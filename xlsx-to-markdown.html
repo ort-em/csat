@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XLSX → Markdown</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5f3ee;
+      --card: #fffdf8;
+      --text: #24231f;
+      --muted: #716e66;
+      --line: #ded9cf;
+      --accent: #246b4b;
+      --accent-hover: #18583b;
+      --accent-soft: #e2f1e9;
+      --danger: #a33a31;
+      --shadow: 0 18px 50px rgba(50, 44, 35, .10);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(255,255,255,.95), transparent 30rem),
+        var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 64px 0;
+    }
+
+    header { margin-bottom: 28px; }
+    h1 { margin: 0 0 8px; font-size: clamp(32px, 6vw, 52px); letter-spacing: -.045em; line-height: 1.05; }
+    header p { margin: 0; color: var(--muted); font-size: 18px; }
+
+    .card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+      box-shadow: var(--shadow);
+    }
+
+    .dropzone {
+      display: grid;
+      place-items: center;
+      min-height: 210px;
+      margin: 22px;
+      padding: 32px;
+      border: 2px dashed #b9b3a7;
+      border-radius: 14px;
+      text-align: center;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .dropzone:hover, .dropzone.dragover { border-color: var(--accent); background: var(--accent-soft); }
+    .dropzone input { display: none; }
+    .dropzone strong { display: block; margin-bottom: 6px; font-size: 20px; }
+    .dropzone span { color: var(--muted); }
+    .file-icon { margin-bottom: 14px; font-size: 38px; line-height: 1; }
+
+    .workspace { display: none; }
+    .workspace.visible { display: block; }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: end;
+      gap: 12px;
+      padding: 20px 22px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #faf8f3;
+    }
+
+    label.control { display: grid; gap: 5px; min-width: 180px; }
+    label.control span { color: var(--muted); font-size: 13px; font-weight: 650; }
+
+    select, button, textarea { font: inherit; }
+    select, button {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: white;
+      color: var(--text);
+    }
+    select { padding: 0 36px 0 12px; }
+    button { padding: 0 16px; font-weight: 700; cursor: pointer; }
+    button.primary { margin-left: auto; border-color: var(--accent); background: var(--accent); color: white; }
+    button.primary:hover { background: var(--accent-hover); }
+    button.secondary:hover { background: #f0ede6; }
+
+    .output-wrap { padding: 22px; }
+    .output-head { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+    .output-head strong { font-size: 14px; }
+    .stats { color: var(--muted); font-size: 13px; }
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 330px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      background: #fff;
+      color: #272823;
+      font: 14px/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      tab-size: 2;
+    }
+    textarea:focus, select:focus, button:focus-visible { outline: 3px solid rgba(36,107,75,.22); outline-offset: 1px; }
+
+    .message { min-height: 24px; padding: 0 22px 18px; color: var(--muted); font-size: 14px; }
+    .message.error { color: var(--danger); }
+    .privacy { margin: 16px 4px 0; color: var(--muted); font-size: 13px; }
+
+    @media (max-width: 620px) {
+      main { padding: 34px 0; }
+      .dropzone { margin: 14px; padding: 22px 14px; }
+      .toolbar { padding: 16px; }
+      label.control { width: 100%; }
+      select { width: 100%; }
+      button.primary { margin-left: 0; flex: 1; }
+      .output-wrap { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>XLSX → Markdown</h1>
+      <p>Превратите лист Excel в Markdown-таблицу прямо в браузере.</p>
+    </header>
+
+    <section class="card">
+      <label class="dropzone" id="dropzone">
+        <input id="fileInput" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+        <span>
+          <span class="file-icon" aria-hidden="true">▦</span>
+          <strong>Перетащите XLSX сюда</strong>
+          <span>или нажмите, чтобы выбрать файл</span>
+        </span>
+      </label>
+
+      <div class="workspace" id="workspace">
+        <div class="toolbar">
+          <label class="control">
+            <span>Лист</span>
+            <select id="sheetSelect"></select>
+          </label>
+          <button class="secondary" id="newFileButton" type="button">Другой файл</button>
+          <button class="primary" id="copyButton" type="button">Скопировать Markdown</button>
+        </div>
+
+        <div class="output-wrap">
+          <div class="output-head">
+            <strong>Результат</strong>
+            <span class="stats" id="stats"></span>
+          </div>
+          <textarea id="output" spellcheck="false" aria-label="Markdown-таблица"></textarea>
+        </div>
+      </div>
+      <div class="message" id="message" role="status" aria-live="polite"></div>
+    </section>
+    <p class="privacy">Файл обрабатывается только на вашем устройстве и никуда не отправляется.</p>
+  </main>
+
+  <script>
+    "use strict";
+
+    const fileInput = document.querySelector("#fileInput");
+    const dropzone = document.querySelector("#dropzone");
+    const workspace = document.querySelector("#workspace");
+    const sheetSelect = document.querySelector("#sheetSelect");
+    const output = document.querySelector("#output");
+    const stats = document.querySelector("#stats");
+    const message = document.querySelector("#message");
+    const copyButton = document.querySelector("#copyButton");
+    const newFileButton = document.querySelector("#newFileButton");
+
+    let workbook = null;
+
+    dropzone.addEventListener("dragover", event => {
+      event.preventDefault();
+      dropzone.classList.add("dragover");
+    });
+    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
+    dropzone.addEventListener("drop", event => {
+      event.preventDefault();
+      dropzone.classList.remove("dragover");
+      const file = event.dataTransfer.files[0];
+      if (file) loadFile(file);
+    });
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files[0]) loadFile(fileInput.files[0]);
+    });
+    sheetSelect.addEventListener("change", renderSelectedSheet);
+    newFileButton.addEventListener("click", () => fileInput.click());
+    copyButton.addEventListener("click", copyMarkdown);
+
+    async function loadFile(file) {
+      clearMessage();
+      if (!file.name.toLowerCase().endsWith(".xlsx")) {
+        showError("Выберите файл в формате .xlsx");
+        return;
+      }
+
+      try {
+        message.textContent = "Читаю файл…";
+        const bytes = new Uint8Array(await file.arrayBuffer());
+        workbook = await readWorkbook(bytes);
+        if (!workbook.sheets.length) throw new Error("В книге не найдено листов");
+
+        sheetSelect.replaceChildren(...workbook.sheets.map((sheet, index) => {
+          const option = document.createElement("option");
+          option.value = String(index);
+          option.textContent = sheet.name;
+          return option;
+        }));
+
+        workspace.classList.add("visible");
+        renderSelectedSheet();
+        message.textContent = `Загружен файл «${file.name}»`;
+      } catch (error) {
+        console.error(error);
+        workspace.classList.remove("visible");
+        showError("Не удалось прочитать XLSX. Возможно, файл повреждён или защищён паролем.");
+      } finally {
+        fileInput.value = "";
+      }
+    }
+
+    function renderSelectedSheet() {
+      if (!workbook) return;
+      const sheet = workbook.sheets[Number(sheetSelect.value) || 0];
+      output.value = rowsToMarkdown(sheet.rows);
+      const rowCount = sheet.rows.length;
+      const columnCount = rowCount ? Math.max(...sheet.rows.map(row => row.length)) : 0;
+      stats.textContent = `${rowCount} строк · ${columnCount} столбцов`;
+      clearMessage();
+    }
+
+    async function copyMarkdown() {
+      try {
+        await navigator.clipboard.writeText(output.value);
+      } catch {
+        output.focus();
+        output.select();
+        document.execCommand("copy");
+      }
+      const original = copyButton.textContent;
+      copyButton.textContent = "Скопировано ✓";
+      setTimeout(() => { copyButton.textContent = original; }, 1600);
+    }
+
+    function rowsToMarkdown(sourceRows) {
+      if (!sourceRows.length) return "";
+      const rows = sourceRows.map(row => row.map(escapeMarkdown));
+      const width = Math.max(1, ...rows.map(row => row.length));
+      rows.forEach(row => { while (row.length < width) row.push(""); });
+
+      const header = rows[0];
+      const divider = Array(width).fill("---");
+      const body = rows.slice(1);
+      return [header, divider, ...body]
+        .map(row => `| ${row.join(" | ")} |`)
+        .join("\n");
+    }
+
+    function escapeMarkdown(value) {
+      return String(value ?? "")
+        .replace(/\\/g, "\\\\")
+        .replace(/\|/g, "\\|")
+        .replace(/\r?\n/g, "<br>");
+    }
+
+    function showError(text) {
+      message.textContent = text;
+      message.classList.add("error");
+    }
+
+    function clearMessage() {
+      message.textContent = "";
+      message.classList.remove("error");
+    }
+
+    // Минимальный XLSX-ридер: XLSX — это ZIP-архив с XML-файлами внутри.
+    async function readWorkbook(bytes) {
+      const zip = await unzip(bytes);
+      const parser = new DOMParser();
+      const xml = path => {
+        const data = zip.get(path);
+        if (!data) throw new Error(`В XLSX отсутствует ${path}`);
+        const doc = parser.parseFromString(new TextDecoder().decode(data), "application/xml");
+        if (doc.querySelector("parsererror")) throw new Error(`Ошибка XML в ${path}`);
+        return doc;
+      };
+
+      const sharedStrings = [];
+      if (zip.has("xl/sharedStrings.xml")) {
+        for (const item of xml("xl/sharedStrings.xml").getElementsByTagName("si")) {
+          sharedStrings.push([...item.getElementsByTagName("t")].map(node => node.textContent).join(""));
+        }
+      }
+
+      const relationships = new Map();
+      const relPath = "xl/_rels/workbook.xml.rels";
+      if (zip.has(relPath)) {
+        for (const rel of xml(relPath).getElementsByTagName("Relationship")) {
+          relationships.set(rel.getAttribute("Id"), normalizePath("xl/", rel.getAttribute("Target")));
+        }
+      }
+
+      const workbookDoc = xml("xl/workbook.xml");
+      const sheets = [];
+      for (const sheetNode of workbookDoc.getElementsByTagName("sheet")) {
+        const relationshipId = sheetNode.getAttribute("r:id") || sheetNode.getAttributeNS("http://schemas.openxmlformats.org/officeDocument/2006/relationships", "id");
+        const path = relationships.get(relationshipId);
+        if (!path || !zip.has(path)) continue;
+        sheets.push({
+          name: sheetNode.getAttribute("name") || `Лист ${sheets.length + 1}`,
+          rows: parseSheet(xml(path), sharedStrings)
+        });
+      }
+      return { sheets };
+    }
+
+    function parseSheet(doc, sharedStrings) {
+      const rows = [];
+      let maxColumn = -1;
+
+      for (const rowNode of doc.getElementsByTagName("row")) {
+        const rowIndex = Math.max(0, Number(rowNode.getAttribute("r") || rows.length + 1) - 1);
+        const row = rows[rowIndex] || [];
+
+        for (const cell of rowNode.getElementsByTagName("c")) {
+          const reference = cell.getAttribute("r") || "A1";
+          const columnIndex = columnFromReference(reference);
+          const type = cell.getAttribute("t");
+          const valueNode = cell.getElementsByTagName("v")[0];
+          let value = valueNode ? valueNode.textContent : "";
+
+          if (type === "s") value = sharedStrings[Number(value)] ?? "";
+          else if (type === "inlineStr") value = [...cell.getElementsByTagName("t")].map(node => node.textContent).join("");
+          else if (type === "b") value = value === "1" ? "TRUE" : "FALSE";
+          else if (type === "str" || type === "e") value = value || "";
+
+          row[columnIndex] = value;
+          maxColumn = Math.max(maxColumn, columnIndex);
+        }
+        rows[rowIndex] = row;
+      }
+
+      for (const row of rows) {
+        if (!row) continue;
+        for (let index = 0; index <= maxColumn; index++) row[index] ??= "";
+      }
+
+      // Удаляем только полностью пустые хвостовые строки и столбцы.
+      while (rows.length && (!rows.at(-1) || rows.at(-1).every(value => value === ""))) rows.pop();
+      let usedWidth = 0;
+      for (const row of rows) {
+        for (let index = row.length - 1; index >= 0; index--) {
+          if (row[index] !== "") { usedWidth = Math.max(usedWidth, index + 1); break; }
+        }
+      }
+      return rows.map(row => (row || []).slice(0, usedWidth));
+    }
+
+    function columnFromReference(reference) {
+      const letters = (reference.match(/^[A-Z]+/i) || ["A"])[0].toUpperCase();
+      let result = 0;
+      for (const letter of letters) result = result * 26 + letter.charCodeAt(0) - 64;
+      return result - 1;
+    }
+
+    function normalizePath(base, target) {
+      if (target.startsWith("/")) return target.slice(1);
+      const parts = (base + target).split("/");
+      const normalized = [];
+      for (const part of parts) {
+        if (!part || part === ".") continue;
+        if (part === "..") normalized.pop();
+        else normalized.push(part);
+      }
+      return normalized.join("/");
+    }
+
+    async function unzip(bytes) {
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      let end = bytes.length - 22;
+      const minimum = Math.max(0, bytes.length - 65557);
+      while (end >= minimum && view.getUint32(end, true) !== 0x06054b50) end--;
+      if (end < minimum) throw new Error("Не найдена ZIP-директория");
+
+      const entryCount = view.getUint16(end + 10, true);
+      let offset = view.getUint32(end + 16, true);
+      const files = new Map();
+      const decoder = new TextDecoder();
+
+      for (let index = 0; index < entryCount; index++) {
+        if (view.getUint32(offset, true) !== 0x02014b50) throw new Error("Повреждена ZIP-директория");
+        const flags = view.getUint16(offset + 8, true);
+        const method = view.getUint16(offset + 10, true);
+        const compressedSize = view.getUint32(offset + 20, true);
+        const nameLength = view.getUint16(offset + 28, true);
+        const extraLength = view.getUint16(offset + 30, true);
+        const commentLength = view.getUint16(offset + 32, true);
+        const localOffset = view.getUint32(offset + 42, true);
+        const nameBytes = bytes.slice(offset + 46, offset + 46 + nameLength);
+        const name = decoder.decode(nameBytes);
+
+        if (view.getUint32(localOffset, true) !== 0x04034b50) throw new Error("Повреждён ZIP-файл");
+        const localNameLength = view.getUint16(localOffset + 26, true);
+        const localExtraLength = view.getUint16(localOffset + 28, true);
+        const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+        const compressed = bytes.slice(dataStart, dataStart + compressedSize);
+
+        let data;
+        if (method === 0) data = compressed;
+        else if (method === 8) data = await inflateRaw(compressed);
+        else throw new Error(`Неподдерживаемый метод ZIP: ${method}`);
+
+        files.set(name.replace(/^\//, ""), data);
+        offset += 46 + nameLength + extraLength + commentLength;
+        void flags;
+      }
+      return files;
+    }
+
+    async function inflateRaw(data) {
+      if (typeof DecompressionStream === "undefined") {
+        throw new Error("Браузер не поддерживает распаковку XLSX");
+      }
+      const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+      return new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+  </script>
+</body>
+</html>
