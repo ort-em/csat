@@ -54,7 +54,7 @@ button {
   position: sticky;
   z-index: 20;
   top: 0;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: space-between;
   min-height: 68px;
@@ -62,6 +62,10 @@ button {
   border-bottom: 1px solid rgba(220, 228, 223, 0.82);
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(18px);
+}
+
+body.is-loaded .topbar {
+  display: flex;
 }
 
 .brand {
@@ -115,13 +119,11 @@ main {
   margin: 0 auto;
 }
 
-.hero {
+.upload-screen {
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.75fr);
-  gap: clamp(38px, 7vw, 96px);
-  align-items: center;
-  min-height: 510px;
-  padding: 72px 0 64px;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 32px 0;
 }
 
 .eyebrow {
@@ -188,6 +190,7 @@ h1 em {
 }
 
 .upload-shell {
+  width: min(430px, 100%);
   min-width: 0;
 }
 
@@ -330,7 +333,7 @@ h1 em {
 
 .dashboard {
   scroll-margin-top: 92px;
-  padding-bottom: 90px;
+  padding: 28px 0 90px;
 }
 
 .file-summary {
@@ -413,7 +416,7 @@ h1 em {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 84px;
+  margin-bottom: 28px;
 }
 
 .metric-card {
@@ -588,11 +591,9 @@ h1 em {
 }
 
 .skills-panel {
-  border: 1px solid var(--line);
-  border-radius: 28px;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  padding: 30px;
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
 }
 
 .skills-heading {
@@ -675,6 +676,9 @@ h1 em {
 }
 
 .toolbar-actions button:focus-visible,
+.sort-button:focus-visible,
+.mobile-sort-controls select:focus-visible,
+.mobile-sort-controls button:focus-visible,
 .exclude-control input:focus-visible {
   outline: 3px solid rgba(15, 118, 110, 0.2);
   outline-offset: 2px;
@@ -691,6 +695,7 @@ h1 em {
   grid-template-columns: minmax(255px, 1.8fr) repeat(4, minmax(92px, 0.62fr)) minmax(108px, 0.72fr);
   gap: 14px;
   align-items: center;
+  min-width: 1000px;
 }
 
 .skills-header {
@@ -703,8 +708,57 @@ h1 em {
   text-transform: uppercase;
 }
 
-.skills-header span:not(:first-child) {
+.sort-button {
+  display: flex;
+  min-width: 0;
+  cursor: pointer;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 5px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  letter-spacing: inherit;
+  padding: 7px 0;
   text-align: right;
+  text-transform: inherit;
+  transition: color 150ms ease;
+}
+
+.sort-button:first-child {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.sort-button:hover,
+.sort-button[data-sort-direction="asc"],
+.sort-button[data-sort-direction="desc"] {
+  color: var(--accent);
+}
+
+.sort-indicator {
+  display: inline-grid;
+  flex: 0 0 auto;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border-radius: 5px;
+  background: #eff3f1;
+  color: #89958f;
+  font-size: 10px;
+  line-height: 1;
+}
+
+.sort-button[data-sort-direction="asc"] .sort-indicator,
+.sort-button[data-sort-direction="desc"] .sort-indicator {
+  background: #dff2eb;
+  color: var(--accent);
+}
+
+.mobile-sort-controls {
+  display: none;
 }
 
 .skills-list {
@@ -804,6 +858,7 @@ h1 em {
 }
 
 footer {
+  display: none;
   padding: 22px 28px 34px;
   border-top: 1px solid var(--line);
   color: #7a8780;
@@ -811,26 +866,13 @@ footer {
   text-align: center;
 }
 
-@media (max-width: 1020px) {
-  .hero {
-    grid-template-columns: 1fr 330px;
-    gap: 40px;
-  }
+body.is-loaded footer {
+  display: block;
+}
 
+@media (max-width: 1020px) {
   .metrics-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .skills-header,
-  .skill-row {
-    grid-template-columns: minmax(240px, 1fr) 110px 110px 122px;
-  }
-
-  .skills-header span:nth-child(4),
-  .skills-header span:nth-child(5),
-  .skill-row .skill-stat:nth-child(4),
-  .skill-row .skill-stat:nth-child(5) {
-    display: none;
   }
 }
 
@@ -849,15 +891,9 @@ footer {
     width: min(100% - 32px, 620px);
   }
 
-  .hero {
-    grid-template-columns: 1fr;
-    gap: 34px;
-    min-height: 0;
-    padding: 54px 0 46px;
-  }
-
-  h1 {
-    font-size: clamp(39px, 12vw, 58px);
+  .upload-screen {
+    min-height: 100dvh;
+    padding: 20px 0;
   }
 
   .drop-zone {
@@ -884,69 +920,16 @@ footer {
 
   .metrics-grid {
     grid-template-columns: 1fr;
-    margin-bottom: 60px;
+    margin-bottom: 28px;
   }
 
   .metric-card {
     min-height: 245px;
   }
 
-  .skills-panel {
-    border-radius: 22px;
-    padding: 22px 16px;
-  }
-
-  .skills-toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .search-box {
-    width: 100%;
-  }
-
-  .toolbar-actions button {
-    flex: 1;
-  }
-
-  .skills-header {
-    display: none;
-  }
-
+  .skills-header,
   .skill-row {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px 9px;
-    padding: 15px;
-  }
-
-  .skill-name-block {
-    grid-column: 1 / 3;
-  }
-
-  .exclude-control {
-    grid-column: 3;
-    grid-row: 1;
-  }
-
-  .skill-row .skill-stat,
-  .skill-row .skill-stat:nth-child(4),
-  .skill-row .skill-stat:nth-child(5) {
-    display: block;
-    text-align: left;
-  }
-
-  .skill-stat-label {
-    display: block;
-    margin-bottom: 4px;
-    color: #87928d;
-    font-size: 8px;
-    font-weight: 750;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .skill-stat strong {
-    font-size: 11px;
+    min-width: 920px;
   }
 }
 
@@ -967,9 +950,6 @@ footer {
     white-space: normal;
   }
 
-  .skills-heading .excluded-summary {
-    white-space: normal;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -995,17 +975,7 @@ footer {
   </header>
 
   <main id="top">
-    <section class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Офлайн-анализ XLSX</p>
-        <h1>Посмотрите, как отключение навыков изменит <em>автоматизацию и CSAT</em></h1>
-        <p class="hero-description">Загрузите таблицу, отметьте навыки для исключения и сразу сравните текущие показатели с новым сценарием.</p>
-        <div class="formula-note">
-          <span class="formula-note-mark" aria-hidden="true">∑</span>
-          <span>Автоматизация считается по сессиям, CSAT — как среднее, взвешенное по количеству оценок.</span>
-        </div>
-      </div>
-
+    <section class="upload-screen" id="upload-screen">
       <div class="upload-shell">
         <label class="drop-zone" id="drop-zone" for="xlsx-file">
           <input id="xlsx-file" type="file" accept=".xlsx,.xls">
@@ -1015,14 +985,6 @@ footer {
           <span class="file-types">.xlsx · .xls</span>
         </label>
         <p class="error-message" id="error-message" role="alert" hidden></p>
-      </div>
-    </section>
-
-    <section class="empty-state" id="empty-state">
-      <div class="empty-number">01</div>
-      <div>
-        <strong>Начните с таблицы</strong>
-        <p>После загрузки здесь появится сравнение «Было → Стало» и список навыков для моделирования.</p>
       </div>
     </section>
 
@@ -1038,7 +1000,6 @@ footer {
 
       <div class="section-heading comparison-heading">
         <div>
-          <p class="eyebrow">Сценарий отключения</p>
           <h2>Было → Стало</h2>
         </div>
         <p id="active-summary"></p>
@@ -1046,33 +1007,13 @@ footer {
       <div class="metrics-grid" id="metrics-grid"></div>
 
       <section class="skills-panel">
-        <div class="section-heading skills-heading">
-          <div>
-            <p class="eyebrow">Детализация</p>
-            <h2>Навыки</h2>
-            <p class="section-description">Отметьте «Исключить», чтобы пересчитать показатели без навыка.</p>
-          </div>
-          <span class="excluded-summary" id="excluded-summary"></span>
-        </div>
-
-        <div class="skills-toolbar">
-          <label class="search-box">
-            <span aria-hidden="true">⌕</span>
-            <input id="skill-search" type="search" placeholder="Найти навык">
-          </label>
-          <div class="toolbar-actions">
-            <button id="reset-exclusions" type="button">Включить все</button>
-            <button id="exclude-all" type="button">Исключить все</button>
-          </div>
-        </div>
-
-        <div class="skills-header" aria-hidden="true">
-          <span>Навык</span>
-          <span>Автоматизация</span>
-          <span>CSAT последний</span>
-          <span>CSAT в сессии</span>
-          <span>Сессии</span>
-          <span>Сценарий</span>
+        <div class="skills-header">
+          <button class="sort-button" data-sort-key="name" data-sort-label="Навык" type="button"><span>Навык</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
+          <button class="sort-button" data-sort-key="automation" data-sort-label="Автоматизация" type="button"><span>Автоматизация</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
+          <button class="sort-button" data-sort-key="csatLast" data-sort-label="CSAT последний" type="button"><span>CSAT последний</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
+          <button class="sort-button" data-sort-key="csatAny" data-sort-label="CSAT в сессии" type="button"><span>CSAT в сессии</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
+          <button class="sort-button" data-sort-key="sessions" data-sort-label="Сессии" type="button"><span>Сессии</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
+          <button class="sort-button" data-sort-key="scenario" data-sort-label="Сценарий" type="button"><span>Сценарий</span><span class="sort-indicator" aria-hidden="true">↕</span></button>
         </div>
         <div class="skills-list" id="skills-list"></div>
       </section>
@@ -1273,7 +1214,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
         header: 1,
         defval: null,
         raw: true,
-        blankrows: false,
+        blankrows: true,
       });
       const parsed = parseGrid(grid, sheetName);
       if (parsed) return { ...parsed, sheetName };
@@ -1318,6 +1259,54 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     };
   }
 
+  function skillAutomation(row) {
+    const sessions = row.automatedSessions + row.nonAutomatedSessions;
+    return sessions > 0 ? row.automatedSessions / sessions : null;
+  }
+
+  function sortValue(row, key, excluded) {
+    if (key === "name") return row.name;
+    if (key === "automation") return skillAutomation(row);
+    if (key === "csatLast") return row.csatLast;
+    if (key === "csatAny") return row.csatAny;
+    if (key === "sessions") {
+      return row.automatedSessions + row.nonAutomatedSessions;
+    }
+    if (key === "scenario") return excluded.has(row.id) ? 1 : 0;
+    return null;
+  }
+
+  function sortRows(rows, excludedIds, key, direction = "asc") {
+    if (!key) return [...rows];
+    const excluded = excludedIds instanceof Set ? excludedIds : new Set(excludedIds);
+    const factor = direction === "desc" ? -1 : 1;
+
+    return [...rows].sort((left, right) => {
+      const leftValue = sortValue(left, key, excluded);
+      const rightValue = sortValue(right, key, excluded);
+      const leftMissing = leftValue === null || leftValue === undefined;
+      const rightMissing = rightValue === null || rightValue === undefined;
+
+      if (leftMissing && rightMissing) {
+        return (left.sourceRow ?? 0) - (right.sourceRow ?? 0);
+      }
+      if (leftMissing) return 1;
+      if (rightMissing) return -1;
+
+      let comparison = 0;
+      if (typeof leftValue === "string" && typeof rightValue === "string") {
+        comparison = leftValue.localeCompare(rightValue, "ru", {
+          sensitivity: "base",
+          numeric: true,
+        });
+      } else {
+        comparison = leftValue - rightValue;
+      }
+      if (comparison !== 0) return comparison * factor;
+      return (left.sourceRow ?? 0) - (right.sourceRow ?? 0);
+    });
+  }
+
   global.CsatCore = Object.freeze({
     HEADERS,
     normalizeHeader,
@@ -1325,6 +1314,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     parseGrid,
     parseWorkbook,
     calculate,
+    skillAutomation,
+    sortRows,
   });
 })(globalThis);
 </script>
@@ -1341,7 +1332,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     baseline: null,
     fileName: "",
     sheetName: "",
-    query: "",
+    sortKey: null,
+    sortDirection: "asc",
   };
 
   const metricDefinitions = [
@@ -1398,17 +1390,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     uploadTitle: document.querySelector("#upload-title"),
     uploadHint: document.querySelector("#upload-hint"),
     error: document.querySelector("#error-message"),
-    empty: document.querySelector("#empty-state"),
+    uploadScreen: document.querySelector("#upload-screen"),
     dashboard: document.querySelector("#dashboard"),
     fileName: document.querySelector("#file-name"),
     fileMeta: document.querySelector("#file-meta"),
     metrics: document.querySelector("#metrics-grid"),
     skills: document.querySelector("#skills-list"),
-    search: document.querySelector("#skill-search"),
-    excludedSummary: document.querySelector("#excluded-summary"),
     activeSummary: document.querySelector("#active-summary"),
-    reset: document.querySelector("#reset-exclusions"),
-    excludeAll: document.querySelector("#exclude-all"),
+    sortButtons: [...document.querySelectorAll("[data-sort-key]")],
   };
 
   const countFormatter = new Intl.NumberFormat("ru-RU", {
@@ -1521,26 +1510,59 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     });
 
     elements.activeSummary.textContent = `${countFormatter.format(current.activeSkills)} из ${countFormatter.format(state.rows.length)} навыков участвуют в расчёте`;
-    elements.excludedSummary.textContent = state.excluded.size
-      ? `Отключено: ${countFormatter.format(state.excluded.size)}`
-      : "Все навыки включены";
-    elements.reset.disabled = state.excluded.size === 0;
-    elements.excludeAll.disabled = state.excluded.size === state.rows.length;
   }
 
   function skillAutomation(row) {
-    const total = row.automatedSessions + row.nonAutomatedSessions;
-    return total > 0 ? row.automatedSessions / total : null;
+    return core.skillAutomation(row);
+  }
+
+  function updateSortControls() {
+    elements.sortButtons.forEach((button) => {
+      const active = button.dataset.sortKey === state.sortKey;
+      const indicator = button.querySelector(".sort-indicator");
+      button.dataset.sortDirection = active ? state.sortDirection : "none";
+      button.setAttribute("aria-pressed", String(active));
+      button.setAttribute(
+        "aria-label",
+        active
+          ? `${button.dataset.sortLabel}: ${state.sortDirection === "asc" ? "по возрастанию" : "по убыванию"}. Нажмите, чтобы изменить порядок.`
+          : `${button.dataset.sortLabel}. Нажмите, чтобы сортировать по возрастанию.`,
+      );
+      if (indicator) {
+        indicator.textContent = active
+          ? state.sortDirection === "asc"
+            ? "↑"
+            : "↓"
+          : "↕";
+      }
+    });
+
+  }
+
+  function setSort(key, preferredDirection) {
+    if (!key) {
+      state.sortKey = null;
+      state.sortDirection = "asc";
+    } else if (state.sortKey === key && !preferredDirection) {
+      state.sortDirection = state.sortDirection === "asc" ? "desc" : "asc";
+    } else {
+      state.sortKey = key;
+      state.sortDirection = preferredDirection ?? "asc";
+    }
+    renderSkills();
   }
 
   function renderSkills() {
-    const query = state.query.trim().toLocaleLowerCase("ru-RU");
-    const filtered = state.rows.filter((row) =>
-      row.name.toLocaleLowerCase("ru-RU").includes(query),
+    const sorted = core.sortRows(
+      state.rows,
+      state.excluded,
+      state.sortKey,
+      state.sortDirection,
     );
+    updateSortControls();
     elements.skills.replaceChildren();
 
-    if (!filtered.length) {
+    if (!sorted.length) {
       const noResults = makeElement("div", "no-results");
       noResults.append(
         makeElement("strong", "", "Навыки не найдены"),
@@ -1550,7 +1572,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       return;
     }
 
-    filtered.forEach((row) => {
+    sorted.forEach((row) => {
       const isExcluded = state.excluded.has(row.id);
       const item = makeElement(
         "div",
@@ -1651,15 +1673,16 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       state.baseline = core.calculate(state.rows, state.excluded);
       state.fileName = file.name;
       state.sheetName = parsed.sheetName;
-      state.query = "";
-      elements.search.value = "";
+      state.sortKey = null;
+      state.sortDirection = "asc";
       elements.fileName.textContent = file.name;
       elements.fileMeta.textContent = `Лист «${parsed.sheetName}» · ${countFormatter.format(state.rows.length)} навыков · заголовки в строке ${parsed.headerRow}`;
-      elements.empty.hidden = true;
+      elements.uploadScreen.hidden = true;
       elements.dashboard.hidden = false;
+      document.body.classList.add("is-loaded");
       renderMetrics();
       renderSkills();
-      elements.dashboard.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.scrollTo({ top: 0, behavior: "auto" });
     } catch (error) {
       setError(error instanceof Error ? error.message : "Не удалось прочитать таблицу.");
     } finally {
@@ -1686,20 +1709,10 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     loadFile(event.dataTransfer?.files?.[0]);
   });
 
-  elements.search.addEventListener("input", (event) => {
-    state.query = event.target.value;
-    renderSkills();
+  elements.sortButtons.forEach((button) => {
+    button.addEventListener("click", () => setSort(button.dataset.sortKey));
   });
-  elements.reset.addEventListener("click", () => {
-    state.excluded.clear();
-    renderMetrics();
-    renderSkills();
-  });
-  elements.excludeAll.addEventListener("click", () => {
-    state.excluded = new Set(state.rows.map((row) => row.id));
-    renderMetrics();
-    renderSkills();
-  });
+  updateSortControls();
 })(globalThis);
 </script>
 </body>
