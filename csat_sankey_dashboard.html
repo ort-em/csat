@@ -60,7 +60,7 @@
   tr:hover td{background:#fafcff}.chain{white-space:normal;line-height:1.45;word-break:break-word}.nowrap{white-space:nowrap}
   .tabs{display:flex;gap:8px}.tab{background:#eef3f8;color:#425466}.tab.active{background:#173f68;color:white}
   .compare-table th,.compare-table td{text-align:right}.compare-table th:first-child,.compare-table td:first-child{text-align:left}
-  .rating-top-stack{display:grid;gap:14px}.rating-top-block{border:1px solid var(--line);border-radius:12px;background:#fbfcfe;overflow:hidden}.rating-top-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#f3f6fa;border-bottom:1px solid var(--line)}.rating-top-head b{font-size:14px}.rating-top-head span{font-size:12px;color:var(--muted)}.rank-col{width:48px;text-align:right}.top-table td:nth-child(1),.top-table th:nth-child(1){text-align:right}.top-table td:nth-child(3),.top-table th:nth-child(3),.top-table td:nth-child(4),.top-table th:nth-child(4){text-align:right;white-space:nowrap}
+  .rating-top-row{display:flex;gap:14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-gutter:stable}.rating-top-block{flex:1 0 360px;min-width:360px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe;overflow:hidden}.rating-top-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#f3f6fa;border-bottom:1px solid var(--line)}.rating-top-head b{font-size:14px}.rating-top-head span{font-size:12px;color:var(--muted)}.rank-col{width:48px;text-align:right}.top-table td:nth-child(1),.top-table th:nth-child(1){text-align:right}.top-table td:nth-child(3),.top-table th:nth-child(3),.top-table td:nth-child(4),.top-table th:nth-child(4){text-align:right;white-space:nowrap}
   details{border-top:1px solid var(--line);margin-top:14px;padding-top:10px}summary{cursor:pointer;font-weight:650;color:#334155}
   footer{max-width:1480px;margin:18px auto 32px;padding:0 24px;color:var(--muted);font-size:12px;line-height:1.5}
   @media(max-width:1050px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.compare-grid{grid-template-columns:1fr}}
@@ -136,6 +136,9 @@
         <label class="ctrl">Макс. значений на шаг
           <input id="topStageInput" type="number" min="3" max="30" value="12" />
         </label>
+        <label class="ctrl"><span>Топ точек</span>
+          <span class="check"><input id="includeCsiTop" type="checkbox" checked> Учитывать CSI-точки</span>
+        </label>
       </div>
     </section>
 
@@ -149,9 +152,16 @@
       <div id="nodeSankey"></div>
     </section>
 
-    <section class="grid grid-2" style="margin-top:16px">
-      <div class="card"><h2>Топ тематик</h2><div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1.</div><div id="topTopics"></div></div>
-      <div class="card"><h2>Топ точек</h2><div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1.</div><div id="topNodes"></div></div>
+    <section class="card" style="margin-top:16px">
+      <h2>Топ точек</h2>
+      <div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1. Переключатель «Учитывать CSI-точки» влияет только на этот топ и таблицы топ-точек в режиме сравнения. Sankey и цепочки не меняются.</div>
+      <div id="topNodes"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Топ тематик</h2>
+      <div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1. В режиме сравнения таблицы выбранных оценок расположены в один горизонтальный ряд.</div>
+      <div id="topTopics"></div>
     </section>
 
     <section class="card" style="margin-top:16px">
@@ -185,6 +195,17 @@ const SCORE_MAP = new Map([
   ['оценка больше 5',5],['оценка меньше 1',1]
 ]);
 const REQUIRED_COLS = ['eduid','num_phrase','node_id','value','payload_label'];
+const CSI_NODES = new Set([
+  'ASR_CSI VOICE ГМ',
+  'ASR_CSI VOICE Нет оценки_ГМ',
+  'ASR_CSI VOICE _Причина высокой оценки',
+  'ASR_CSI VOICE Причина высокой оценкиПИЛОТ',
+  'ASR_CSI VOICE _Причина низкой оценки',
+  'ASR_CSI VOICE Причина низкой оценкиПИЛОТ',
+  'ASR_CSI VOICE _Причина хорошей оценки',
+  'ASR_CSI VOICE Причина хорошей оценкиПИЛОТ',
+  'ASR_CSI VOICE попытка_2 ГМ'
+]);
 const state = { workbook:null, sessions:[], retained:[], totalSessions:0, chainTab:'topic', currentChainRows:[] };
 
 const $ = id => document.getElementById(id);
@@ -341,10 +362,18 @@ function sankeySvg(sessions,dim){
 }
 function renderSankeyArea(id,groups,dim){ const el=$(id); if(getMode()==='single'){el.innerHTML=sankeySvg(groups[0]?.sessions||[],dim);return;} if(!groups.length){el.innerHTML='<div class="warning">Выберите хотя бы одну оценку для сравнения.</div>';return;} el.innerHTML=`<div class="compare-grid">${groups.map(g=>`<div class="compare-card"><h4>${esc(g.label)} — ${fmt(g.sessions.length)} сесс.</h4>${sankeySvg(g.sessions,dim)}</div>`).join('')}</div>`; }
 
-function uniqueTop(sessions,dim){ const m=new Map(); sessions.forEach(s=>{ const set=new Set(seqFor(s,dim)); set.forEach(v=>m.set(v,(m.get(v)||0)+1)); }); return [...m.entries()].map(([label,count])=>({label,count,share:sessions.length?count/sessions.length:0})).sort((a,b)=>b.count-a.count||a.label.localeCompare(b.label,'ru')); }
+function uniqueTop(sessions,dim){
+  const m=new Map(), includeCsi = !$('includeCsiTop') || $('includeCsiTop').checked;
+  sessions.forEach(s=>{
+    const values=seqFor(s,dim).filter(v=>dim!=='node' || includeCsi || !CSI_NODES.has(clean(v)));
+    const set=new Set(values);
+    set.forEach(v=>m.set(v,(m.get(v)||0)+1));
+  });
+  return [...m.entries()].map(([label,count])=>({label,count,share:sessions.length?count/sessions.length:0})).sort((a,b)=>b.count-a.count||a.label.localeCompare(b.label,'ru'));
+}
 function topListHtml(sessions,dim,limit=15){ const arr=uniqueTop(sessions,dim).slice(0,limit), max=arr[0]?.count||1; if(!arr.length)return '<div class="muted">Нет данных.</div>'; return `<div class="top-list">${arr.map(x=>`<div class="top-item"><div title="${esc(x.label)}">${esc(x.label)}</div><div class="barbg"><div class="barfill" style="width:${100*x.count/max}%"></div></div><div class="num"><b>${fmt(x.count)}</b> · ${pct(x.count,sessions.length)}</div></div>`).join('')}</div>`; }
 function topTableHtml(sessions,dim,limit=15){ const arr=uniqueTop(sessions,dim).slice(0,limit); if(!arr.length)return '<div class="muted" style="padding:12px">Нет данных.</div>'; return `<div class="table-scroll" style="max-height:440px;border:0;border-radius:0"><table class="top-table"><thead><tr><th class="rank-col">#</th><th>${dim==='topic'?'Тематика':'Точка'}</th><th>Сессий</th><th>Доля</th></tr></thead><tbody>${arr.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.label)}</td><td><b>${fmt(x.count)}</b></td><td>${pct(x.count,sessions.length)}</td></tr>`).join('')}</tbody></table></div>`; }
-function renderTop(id,groups,dim){ const el=$(id); if(getMode()==='single'){el.innerHTML=topListHtml(groups[0]?.sessions||[],dim);return;} if(!groups.length){el.innerHTML='<div class="muted">Выберите оценки.</div>';return;} el.innerHTML=`<div class="rating-top-stack">${groups.map(g=>`<div class="rating-top-block"><div class="rating-top-head"><b>${esc(g.label)}</b><span>${fmt(g.sessions.length)} сесс.</span></div>${topTableHtml(g.sessions,dim)}</div>`).join('')}</div>`; }
+function renderTop(id,groups,dim){ const el=$(id); if(getMode()==='single'){el.innerHTML=topListHtml(groups[0]?.sessions||[],dim);return;} if(!groups.length){el.innerHTML='<div class="muted">Выберите оценки.</div>';return;} el.innerHTML=`<div class="rating-top-row">${groups.map(g=>`<div class="rating-top-block"><div class="rating-top-head"><b>${esc(g.label)}</b><span>${fmt(g.sessions.length)} сесс.</span></div>${topTableHtml(g.sessions,dim)}</div>`).join('')}</div>`; }
 
 function groupedChainsFor(sessions,dim,groupLabel=null){ const m=new Map(); for(const s of sessions){ const ch=seqFor(s,dim).join(' → '); if(!m.has(ch))m.set(ch,{chain:ch,count:0,ids:[]}); const x=m.get(ch);x.count++; if(x.ids.length<5)x.ids.push(s.eduid); } return [...m.values()].map(x=>({...x,share:sessions.length?x.count/sessions.length:0,rating:groupLabel})).sort((a,b)=>b.count-a.count||a.chain.localeCompare(b.chain,'ru')); }
 function buildChainRows(){ const groups=selectedGroups(), dim=state.chainTab; return getMode()==='single'?groupedChainsFor(groups[0]?.sessions||[],dim,null):groups.flatMap(g=>groupedChainsFor(g.sessions,dim,g.label)); }
@@ -362,7 +391,7 @@ $('fileInput').addEventListener('change',e=>e.target.files[0]&&loadFile(e.target
 $('sheetSelect').addEventListener('change',e=>analyzeSheet(Number(e.target.value)));
 const drop=$('drop'); ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')})); ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')})); drop.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]));
 $('modeSelect').addEventListener('change',()=>{ const cmp=getMode()==='compare'; $('singleBox').classList.toggle('hidden',cmp); $('compareBox').classList.toggle('hidden',!cmp); renderAll(); });
-$('singleRating').addEventListener('change',renderAll); $('ratingChecks').addEventListener('change',renderAll); $('depthInput').addEventListener('change',renderAll); $('topStageInput').addEventListener('change',renderAll); $('chainSearch').addEventListener('input',renderChainTable); $('exportCsv').addEventListener('click',exportChainCsv);
+$('singleRating').addEventListener('change',renderAll); $('ratingChecks').addEventListener('change',renderAll); $('depthInput').addEventListener('change',renderAll); $('topStageInput').addEventListener('change',renderAll); $('includeCsiTop').addEventListener('change',()=>{ renderTop('topNodes',selectedGroups(),'node'); }); $('chainSearch').addEventListener('input',renderChainTable); $('exportCsv').addEventListener('click',exportChainCsv);
 document.querySelectorAll('[data-chain-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-chain-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.chainTab=b.dataset.chainTab;renderChainTable();}));
 </script>
 </body>
