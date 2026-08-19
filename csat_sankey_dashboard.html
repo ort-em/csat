@@ -86,6 +86,7 @@
         <div class="small muted" style="line-height:1.65">
           Анализируются только сессии, в которых есть точка <b>ASR_CSI VOICE ГМ</b>.<br>
           Оценки <b>«Оценка больше 5» → 5</b>, <b>«Оценка меньше 1» → 1</b>.<br>
+          В <b>payload_label</b> внешние кавычки (например, <code>"Оценка 5"</code>), лишние пробелы и невидимые символы автоматически очищаются перед распознаванием.<br>
           Если в сессии найдено несколько оценок, используется последняя по <b>num_phrase</b>.<br>
           В топах повтор одной тематики или точки внутри одного <b>eduid</b> считается один раз.
         </div>
@@ -189,8 +190,17 @@ const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const fmt = n => new Intl.NumberFormat('ru-RU').format(n || 0);
 const pct = (a,b) => b ? (100*a/b).toFixed(a/b < .1 ? 1 : 0)+'%' : '0%';
-const clean = v => String(v ?? '').trim();
+const clean = v => String(v ?? '').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\u00A0/g,' ').trim();
+const cleanLabel = v => {
+  let s = clean(v), prev = null;
+  while (s && s !== prev) {
+    prev = s;
+    s = s.replace(/^[\"'“”«»]+\s*/, '').replace(/\s*[\"'“”«»]+$/, '').trim();
+  }
+  return s;
+};
 const norm = v => clean(v).toLowerCase().replace(/\s+/g,' ');
+const normLabel = v => cleanLabel(v).toLowerCase().replace(/\s+/g,' ');
 const displayVal = v => clean(v) || '(пусто)';
 const ratingLabel = r => r == null ? 'Нет оценки' : 'Оценка '+r;
 
@@ -263,14 +273,14 @@ function sheetRowsToObjects(matrix){
   const headers=(matrix[hi]||[]).map(v=>norm(v)); const positions={}; REQUIRED_COLS.forEach(c=>positions[c]=headers.indexOf(c));
   const missing=REQUIRED_COLS.filter(c=>positions[c]<0); if(missing.length) throw new Error('Не найдены обязательные колонки: '+missing.join(', '));
   const out=[]; for(let i=hi+1;i<matrix.length;i++){ const r=matrix[i]||[]; const eduid=clean(r[positions.eduid]); if(!eduid) continue; out.push({
-    eduid, num_phrase:Number(r[positions.num_phrase]), node_id:clean(r[positions.node_id]), value:clean(r[positions.value]), payload_label:clean(r[positions.payload_label]), _row:i+1
+    eduid, num_phrase:Number(r[positions.num_phrase]), node_id:clean(r[positions.node_id]), value:clean(r[positions.value]), payload_label:cleanLabel(r[positions.payload_label]), _row:i+1
   }); }
   return out;
 }
 function buildSessions(rows){
   const map=new Map(); for(const r of rows){ if(!map.has(r.eduid))map.set(r.eduid,[]); map.get(r.eduid).push(r); }
   const sessions=[]; for(const [eduid,rs] of map){ rs.sort((a,b)=>((Number.isFinite(a.num_phrase)?a.num_phrase:1e15)-(Number.isFinite(b.num_phrase)?b.num_phrase:1e15)) || a._row-b._row);
-    const scoreHits=rs.map((r,i)=>({i,r,score:SCORE_MAP.get(norm(r.payload_label))})).filter(x=>x.score!=null); const distinct=[...new Set(scoreHits.map(x=>x.score))]; const rating=scoreHits.length?scoreHits[scoreHits.length-1].score:null;
+    const scoreHits=rs.map((r,i)=>({i,r,score:SCORE_MAP.get(normLabel(r.payload_label))})).filter(x=>x.score!=null); const distinct=[...new Set(scoreHits.map(x=>x.score))]; const rating=scoreHits.length?scoreHits[scoreHits.length-1].score:null;
     sessions.push({eduid,rows:rs,rating,scoreHits,conflict:distinct.length>1,hasTarget:rs.some(r=>clean(r.node_id)===TARGET_NODE)});
   }
   return sessions;
