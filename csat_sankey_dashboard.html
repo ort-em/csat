@@ -397,13 +397,12 @@ const drop=$('drop'); ['dragenter','dragover'].forEach(ev=>drop.addEventListener
 $('modeSelect').addEventListener('change',()=>{ const cmp=getMode()==='compare'; $('singleBox').classList.toggle('hidden',cmp); $('compareBox').classList.toggle('hidden',!cmp); renderAll(); });
 $('singleRating').addEventListener('change',renderAll); $('ratingChecks').addEventListener('change',renderAll); $('depthInput').addEventListener('change',renderAll); $('topStageInput').addEventListener('change',renderAll); $('includeCsiTop').addEventListener('change',()=>{ renderTop('topNodes',selectedGroups(),'node'); }); $('chainSearch').addEventListener('input',renderChainTable); $('exportCsv').addEventListener('click',exportChainCsv);
 document.querySelectorAll('[data-chain-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-chain-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.chainTab=b.dataset.chainTab;renderChainTable();}));
-// Подсветка строк во всех динамически создаваемых таблицах. Повторный клик снимает выделение.
+// Независимая подсветка строк во всех динамически создаваемых таблицах.
+// Можно выделить любое количество строк одновременно; повторный клик снимает выделение только с выбранной строки.
 document.addEventListener('click',e=>{
   const row=e.target.closest('tbody tr');
   if(!row || !row.closest('table')) return;
-  const wasSelected=row.classList.contains('row-selected');
-  document.querySelectorAll('tbody tr.row-selected').forEach(r=>r.classList.remove('row-selected'));
-  if(!wasSelected) row.classList.add('row-selected');
+  row.classList.toggle('row-selected');
 });
 </script>
 </body>
