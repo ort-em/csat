@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CSAT Sankey Dashboard</title>
+<style>
+  :root {
+    --bg:#f4f7fb; --card:#ffffff; --ink:#122033; --muted:#64748b; --line:#dce3ec;
+    --accent:#2563eb; --accent2:#0f766e; --danger:#b42318; --warn:#a15c00; --ok:#087443;
+    --shadow:0 8px 28px rgba(15,23,42,.07); --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{background:linear-gradient(125deg,#0f2742,#173f68 60%,#0f766e);color:white;padding:30px 24px}
+  header .wrap,.wrap{max-width:1480px;margin:0 auto}
+  h1{margin:0 0 8px;font-size:30px;letter-spacing:-.02em}
+  header p{margin:0;color:#d9e7f5;max-width:900px;line-height:1.5}
+  main{padding:24px}
+  .grid{display:grid;gap:16px}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .card{background:var(--card);border:1px solid #e5eaf1;border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;min-width:0}
+  .card h2{font-size:18px;margin:0 0 12px}.card h3{font-size:15px;margin:0 0 10px}
+  .muted{color:var(--muted)} .small{font-size:12px}.hidden{display:none!important}
+  .drop{border:2px dashed #aac1dd;border-radius:14px;padding:28px;text-align:center;background:#f8fbff;transition:.15s}
+  .drop.drag{border-color:var(--accent);background:#eef5ff}
+  input[type=file]{display:none}
+  button,.button,select,input[type=number],input[type=text]{font:inherit}
+  button,.button{border:0;border-radius:10px;padding:10px 14px;cursor:pointer;font-weight:650}
+  .primary{background:var(--accent);color:white}.secondary{background:#eaf1f9;color:#173f68}.ghost{background:white;border:1px solid var(--line);color:var(--ink)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .controls{display:grid;grid-template-columns:1.3fr 1.1fr 1fr 1fr;gap:14px;align-items:end}
+  label.ctrl{display:block;font-size:12px;color:var(--muted);font-weight:650}
+  label.ctrl select,label.ctrl input[type=number],label.ctrl input[type=text]{display:block;width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:white;color:var(--ink)}
+  .checks{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px}
+  .check{display:flex;align-items:center;gap:5px;background:#f5f8fc;border:1px solid var(--line);border-radius:9px;padding:7px 9px;color:var(--ink);font-size:13px}
+  .metric{padding:16px}.metric .value{font-size:27px;font-weight:800;letter-spacing:-.025em}.metric .label{color:var(--muted);font-size:12px;margin-top:4px}
+  .metric.good .value{color:var(--ok)}.metric.warn .value{color:var(--warn)}
+  .statusline{border-left:4px solid var(--accent);background:#f2f7ff;padding:12px 14px;border-radius:10px;margin-top:12px;font-weight:650}
+  .warning{border-left:4px solid #eab308;background:#fff9dc;padding:10px 12px;border-radius:10px;color:#713f12;margin-top:10px}
+  .error{border-left:4px solid #ef4444;background:#fff0f0;padding:10px 12px;border-radius:10px;color:#7f1d1d;margin-top:10px}
+  .rating-pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.pill{background:#eef3f8;border:1px solid #dde5ee;border-radius:999px;padding:5px 9px;font-size:12px}
+  .section-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .sankey-wrap{overflow:auto;border:1px solid #edf0f4;border-radius:12px;background:#fff;min-height:300px}
+  .sankey-empty{display:flex;align-items:center;justify-content:center;height:280px;color:var(--muted)}
+  svg.sankey{display:block;font-family:inherit}
+  .compare-grid{display:grid;grid-template-columns:repeat(2,minmax(520px,1fr));gap:14px;overflow-x:auto}
+  .compare-card{border:1px solid var(--line);border-radius:12px;padding:10px;background:#fbfcfe;min-width:0}
+  .compare-card h4{margin:2px 4px 8px;font-size:14px}
+  .top-list{display:grid;gap:8px}.top-item{display:grid;grid-template-columns:minmax(150px,1.5fr) minmax(120px,2fr) 90px;gap:10px;align-items:center;font-size:13px}
+  .barbg{height:10px;background:#edf2f7;border-radius:999px;overflow:hidden}.barfill{height:100%;background:linear-gradient(90deg,#3b82f6,#0f766e);border-radius:999px}
+  .num{text-align:right;font-variant-numeric:tabular-nums;color:#334155}
+  .table-tools{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap}
+  .table-tools input{min-width:250px;border:1px solid var(--line);border-radius:9px;padding:8px 10px}
+  .table-scroll{max-height:520px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:12.5px}
+  th{position:sticky;top:0;z-index:1;background:#eef3f8;color:#334155;text-align:left;padding:9px;border-bottom:1px solid var(--line)}
+  td{padding:8px 9px;border-bottom:1px solid #edf0f4;vertical-align:top}
+  tbody tr{cursor:pointer}
+  tr:hover td{background:#fafcff}
+  tbody tr.row-selected td{background:#dbeafe!important;box-shadow:inset 0 1px 0 #bfdbfe,inset 0 -1px 0 #bfdbfe}
+  tbody tr.row-selected td:first-child{box-shadow:inset 3px 0 0 var(--accent),inset 0 1px 0 #bfdbfe,inset 0 -1px 0 #bfdbfe}
+  .chain{white-space:normal;line-height:1.45;word-break:break-word}.nowrap{white-space:nowrap}
+  .tabs{display:flex;gap:8px}.tab{background:#eef3f8;color:#425466}.tab.active{background:#173f68;color:white}
+  .compare-table th,.compare-table td{text-align:right}.compare-table th:first-child,.compare-table td:first-child{text-align:left}
+  .rating-top-row{display:flex;gap:14px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;scrollbar-gutter:stable}.rating-top-block{flex:1 0 360px;min-width:360px;border:1px solid var(--line);border-radius:12px;background:#fbfcfe;overflow:hidden}.rating-top-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 12px;background:#f3f6fa;border-bottom:1px solid var(--line)}.rating-top-head b{font-size:14px}.rating-top-head span{font-size:12px;color:var(--muted)}.rank-col{width:48px;text-align:right}.top-table td:nth-child(1),.top-table th:nth-child(1){text-align:right}.top-table td:nth-child(3),.top-table th:nth-child(3),.top-table td:nth-child(4),.top-table th:nth-child(4){text-align:right;white-space:nowrap}
+  details{border-top:1px solid var(--line);margin-top:14px;padding-top:10px}summary{cursor:pointer;font-weight:650;color:#334155}
+  footer{max-width:1480px;margin:18px auto 32px;padding:0 24px;color:var(--muted);font-size:12px;line-height:1.5}
+  @media(max-width:1050px){.grid-4{grid-template-columns:repeat(2,1fr)}.grid-2{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.compare-grid{grid-template-columns:1fr}}
+  @media(max-width:640px){main{padding:12px}header{padding:22px 16px}.grid-4,.controls{grid-template-columns:1fr}.top-item{grid-template-columns:1fr 1fr 70px}.compare-grid{display:block}.compare-card{margin-bottom:12px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <h1>CSAT Sankey Dashboard</h1>
+  <p>Автономный анализ цепочек <b>payload_label</b> и <b>node_id</b>. Файл обрабатывается локально в браузере и никуда не отправляется.</p>
+</div></header>
+<main class="wrap">
+  <section class="card">
+    <div class="grid grid-2">
+      <div id="drop" class="drop">
+        <div style="font-size:38px">⇧</div>
+        <div style="font-weight:800;font-size:17px;margin:4px 0">Перетащите .xlsx или .csv</div>
+        <div class="muted small" style="margin-bottom:12px">Нужны колонки: eduid, num_phrase, node_id, value, payload_label</div>
+        <label class="button primary" for="fileInput">Выбрать файл</label>
+        <input id="fileInput" type="file" accept=".xlsx,.csv,.txt" />
+      </div>
+      <div>
+        <h2>Правила анализа</h2>
+        <div class="small muted" style="line-height:1.65">
+          Анализируются только сессии, в которых есть точка <b>ASR_CSI VOICE ГМ</b>.<br>
+          Оценки <b>«Оценка больше 5» → 5</b>, <b>«Оценка меньше 1» → 1</b>.<br>
+          В <b>payload_label</b> внешние кавычки (например, <code>"Оценка 5"</code>), лишние пробелы и невидимые символы автоматически очищаются перед распознаванием.<br>
+          Если в сессии найдено несколько оценок, используется последняя по <b>num_phrase</b>.<br>
+          В топах повтор одной тематики или точки внутри одного <b>eduid</b> считается один раз.
+        </div>
+        <div id="sheetBox" class="hidden" style="margin-top:14px">
+          <label class="ctrl">Лист Excel<select id="sheetSelect"></select></label>
+        </div>
+        <div id="loadMessage"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="hidden">
+    <section class="grid grid-4" style="margin-top:16px">
+      <div class="card metric"><div id="mTotal" class="value">—</div><div class="label">Всего сессий в файле</div></div>
+      <div class="card metric good"><div id="mKept" class="value">—</div><div class="label">Осталось после обязательной CSAT-точки</div></div>
+      <div class="card metric"><div id="mRated" class="value">—</div><div class="label">С распознанной оценкой 1–5</div></div>
+      <div class="card metric warn"><div id="mCurrent" class="value">—</div><div class="label">Сессий в текущем фильтре</div></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div id="keptStatus" class="statusline"></div>
+      <div id="conflictWarning" class="warning hidden"></div>
+      <div id="ratingPills" class="rating-pills"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Фильтр и режим сравнения</h2>
+      <div class="controls">
+        <label class="ctrl">Режим
+          <select id="modeSelect">
+            <option value="single">Одна оценка / общий срез</option>
+            <option value="compare">Сравнение нескольких оценок</option>
+          </select>
+        </label>
+        <label id="singleBox" class="ctrl">Оценка
+          <select id="singleRating">
+            <option value="all">Все оценки + без оценки</option>
+            <option value="1">Оценка 1</option><option value="2">Оценка 2</option><option value="3">Оценка 3</option>
+            <option value="4">Оценка 4</option><option value="5">Оценка 5</option><option value="none">Нет оценки</option>
+          </select>
+        </label>
+        <div id="compareBox" class="ctrl hidden"><span>Сравнить оценки</span><div id="ratingChecks" class="checks"></div></div>
+        <label class="ctrl">Глубина Sankey
+          <input id="depthInput" type="number" min="2" max="30" value="12" />
+        </label>
+        <label class="ctrl">Макс. значений на шаг
+          <input id="topStageInput" type="number" min="3" max="30" value="12" />
+        </label>
+        <label class="ctrl"><span>Топ точек</span>
+          <span class="check"><input id="includeCsiTop" type="checkbox" checked> Учитывать CSI-точки</span>
+        </label>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="section-title"><div><h2>Sankey — цепочки тематик</h2><div class="muted small">Переходы между последовательными payload_label. Редкие значения на каждом шаге объединяются в «Другие» только на диаграмме.</div></div></div>
+      <div id="topicSankey"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="section-title"><div><h2>Sankey — цепочки точек</h2><div class="muted small">Переходы между последовательными node_id в порядке num_phrase.</div></div></div>
+      <div id="nodeSankey"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Топ точек</h2>
+      <div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1. Переключатель «Учитывать CSI-точки» влияет только на этот топ и таблицы топ-точек в режиме сравнения. Sankey и цепочки не меняются.</div>
+      <div id="topNodes"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Топ тематик</h2>
+      <div class="muted small" style="margin-bottom:10px">Уникальное присутствие в сессии: повтор внутри eduid = 1. В режиме сравнения таблицы выбранных оценок расположены в один горизонтальный ряд.</div>
+      <div id="topTopics"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="section-title">
+        <div><h2>Таблица цепочек</h2><div class="muted small">Таблица строится по тем же отфильтрованным сессиям; цепочки здесь полные и не агрегируются в «Другие».</div></div>
+        <div class="tabs"><button class="tab active" data-chain-tab="topic">Тематики</button><button class="tab" data-chain-tab="node">Точки</button></div>
+      </div>
+      <div class="table-tools">
+        <input id="chainSearch" type="text" placeholder="Поиск по цепочке…" />
+        <div class="row"><span id="chainCount" class="muted small"></span><button id="exportCsv" class="ghost">Скачать CSV таблицы</button></div>
+      </div>
+      <div id="chainTable" class="table-scroll"></div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Контроль качества данных</h2>
+      <div id="quality"></div>
+      <details><summary>CSAT-точки, заложенные в страницу</summary><div class="small muted" style="line-height:1.7;margin-top:8px">
+        ASR_CSI VOICE ГМ; ASR_CSI VOICE Нет оценки_ГМ; ASR_CSI VOICE _Причина высокой оценки; ASR_CSI VOICE Причина высокой оценкиПИЛОТ; ASR_CSI VOICE _Причина низкой оценки; ASR_CSI VOICE Причина низкой оценкиПИЛОТ; ASR_CSI VOICE _Причина хорошей оценки; ASR_CSI VOICE Причина хорошей оценкиПИЛОТ; ASR_CSI VOICE попытка_2 ГМ.
+      </div></details>
+    </section>
+  </section>
+</main>
+<footer>Офлайн-страница без внешних библиотек. Для чтения .xlsx используется встроенный в страницу ZIP/XML-парсер; рекомендуется современный Chrome / Edge. Старый формат .xls не поддерживается — сохраните файл как .xlsx.</footer>
+
+<script>
+'use strict';
+const TARGET_NODE = 'ASR_CSI VOICE ГМ';
+const SCORE_MAP = new Map([
+  ['оценка 1',1],['оценка 2',2],['оценка 3',3],['оценка 4',4],['оценка 5',5],
+  ['оценка больше 5',5],['оценка меньше 1',1]
+]);
+const REQUIRED_COLS = ['eduid','num_phrase','node_id','value','payload_label'];
+const CSI_NODES = new Set([
+  'ASR_CSI VOICE ГМ',
+  'ASR_CSI VOICE Нет оценки_ГМ',
+  'ASR_CSI VOICE _Причина высокой оценки',
+  'ASR_CSI VOICE Причина высокой оценкиПИЛОТ',
+  'ASR_CSI VOICE _Причина низкой оценки',
+  'ASR_CSI VOICE Причина низкой оценкиПИЛОТ',
+  'ASR_CSI VOICE _Причина хорошей оценки',
+  'ASR_CSI VOICE Причина хорошей оценкиПИЛОТ',
+  'ASR_CSI VOICE попытка_2 ГМ'
+]);
+const state = { workbook:null, sessions:[], retained:[], totalSessions:0, chainTab:'topic', currentChainRows:[] };
+
+const $ = id => document.getElementById(id);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const fmt = n => new Intl.NumberFormat('ru-RU').format(n || 0);
+const pct = (a,b) => b ? (100*a/b).toFixed(a/b < .1 ? 1 : 0)+'%' : '0%';
+const clean = v => String(v ?? '').replace(/[\u200B-\u200D\uFEFF]/g,'').replace(/\u00A0/g,' ').trim();
+const cleanLabel = v => {
+  let s = clean(v), prev = null;
+  while (s && s !== prev) {
+    prev = s;
+    s = s.replace(/^[\"'“”«»]+\s*/, '').replace(/\s*[\"'“”«»]+$/, '').trim();
+  }
+  return s;
+};
+const norm = v => clean(v).toLowerCase().replace(/\s+/g,' ');
+const normLabel = v => cleanLabel(v).toLowerCase().replace(/\s+/g,' ');
+const displayVal = v => clean(v) || '(пусто)';
+const ratingLabel = r => r == null ? 'Нет оценки' : 'Оценка '+r;
+
+function showMsg(html, type='') { $('loadMessage').innerHTML = `<div class="${type}">${html}</div>`; }
+function hashColor(str){ let h=0; for(let i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0; const hue=h%360; return `hsl(${hue} 55% 48%)`; }
+
+// ---- Minimal offline XLSX reader (ZIP + XML) ----
+function u16(dv,o){return dv.getUint16(o,true)} function u32(dv,o){return dv.getUint32(o,true)}
+function findEOCD(u8){ const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength); const min=Math.max(0,u8.length-22-65535); for(let i=u8.length-22;i>=min;i--){ if(u32(dv,i)===0x06054b50)return i; } throw new Error('Не найден конец ZIP-архива. Возможно, файл повреждён.'); }
+async function unzipXlsx(arrayBuffer){
+  const u8=new Uint8Array(arrayBuffer), dv=new DataView(arrayBuffer); const eocd=findEOCD(u8);
+  const count=u16(dv,eocd+10), cdOffset=u32(dv,eocd+16); let p=cdOffset; const entries=new Map(); const dec=new TextDecoder('utf-8');
+  for(let i=0;i<count;i++){
+    if(u32(dv,p)!==0x02014b50) throw new Error('Некорректная центральная директория ZIP.');
+    const method=u16(dv,p+10), compSize=u32(dv,p+20), uncompSize=u32(dv,p+24), nameLen=u16(dv,p+28), extraLen=u16(dv,p+30), commentLen=u16(dv,p+32), localOffset=u32(dv,p+42);
+    const name=dec.decode(u8.slice(p+46,p+46+nameLen)); entries.set(name,{method,compSize,uncompSize,localOffset}); p+=46+nameLen+extraLen+commentLen;
+  }
+  async function get(name){
+    const e=entries.get(name); if(!e) throw new Error('В .xlsx отсутствует '+name); const lo=e.localOffset;
+    if(u32(dv,lo)!==0x04034b50) throw new Error('Некорректная локальная запись ZIP.');
+    const nl=u16(dv,lo+26), el=u16(dv,lo+28), start=lo+30+nl+el; const comp=u8.slice(start,start+e.compSize);
+    if(e.method===0) return comp;
+    if(e.method===8){
+      if(typeof DecompressionStream==='undefined') throw new Error('Браузер не поддерживает DecompressionStream. Откройте страницу в современном Chrome или Edge.');
+      const ds=new DecompressionStream('deflate-raw'); const stream=new Blob([comp]).stream().pipeThrough(ds); return new Uint8Array(await new Response(stream).arrayBuffer());
+    }
+    throw new Error('Неподдерживаемый метод сжатия ZIP: '+e.method);
+  }
+  return {entries,get};
+}
+function xml(text){ const doc=new DOMParser().parseFromString(text,'application/xml'); const pe=doc.querySelector('parsererror'); if(pe) throw new Error('Ошибка XML внутри .xlsx'); return doc; }
+function normalizePath(path){ const out=[]; for(const part of path.split('/')){ if(!part||part==='.')continue; if(part==='..')out.pop(); else out.push(part); } return out.join('/'); }
+function colIndex(ref){ const m=/^([A-Z]+)/i.exec(ref||''); if(!m)return 0; let n=0; for(const ch of m[1].toUpperCase()) n=n*26+(ch.charCodeAt(0)-64); return n-1; }
+function xe(root,name){ return [...root.getElementsByTagNameNS('*',name)]; }
+function textOfTs(el){ return xe(el,'t').map(t=>t.textContent||'').join(''); }
+async function parseXlsx(file){
+  const zip=await unzipXlsx(await file.arrayBuffer()), dec=new TextDecoder('utf-8');
+  const wbDoc=xml(dec.decode(await zip.get('xl/workbook.xml'))); const relDoc=xml(dec.decode(await zip.get('xl/_rels/workbook.xml.rels')));
+  const rels=new Map(); xe(relDoc,'Relationship').forEach(r=>rels.set(r.getAttribute('Id'),r.getAttribute('Target')));
+  let shared=[]; if(zip.entries.has('xl/sharedStrings.xml')){ const sdoc=xml(dec.decode(await zip.get('xl/sharedStrings.xml'))); shared=xe(sdoc,'si').map(textOfTs); }
+  const sheets=[]; const sheetEls=xe(wbDoc,'sheet');
+  for(const s of sheetEls){
+    const rid=s.getAttributeNS('http://schemas.openxmlformats.org/officeDocument/2006/relationships','id') || s.getAttribute('r:id');
+    let target=rels.get(rid); if(!target) continue; const path=normalizePath(target.startsWith('/')?target.slice(1):'xl/'+target);
+    const sdoc=xml(dec.decode(await zip.get(path))); const data=[];
+    for(const row of xe(sdoc,'row')){
+      const arr=[]; for(const c of xe(row,'c')){
+        const idx=colIndex(c.getAttribute('r')); const t=c.getAttribute('t')||''; let val='';
+        if(t==='inlineStr') val=textOfTs(c);
+        else { const v=xe(c,'v')[0]; const raw=v ? v.textContent||'' : ''; if(t==='s') val=shared[Number(raw)] ?? ''; else if(t==='b') val=raw==='1'?'TRUE':'FALSE'; else if(t==='str') val=raw; else if(raw!=='' && /^-?\d+(\.\d+)?([eE][+-]?\d+)?$/.test(raw)) val=Number(raw); else val=raw; }
+        arr[idx]=val;
+      }
+      data.push(arr);
+    }
+    sheets.push({name:s.getAttribute('name')||('Лист '+(sheets.length+1)), rows:data});
+  }
+  if(!sheets.length) throw new Error('В книге не найдено листов с данными.');
+  return sheets;
+}
+function parseDelimited(text){
+  const first=(text.split(/\r?\n/,1)[0]||''); const candidates=[',',';','\t']; let delim=candidates.sort((a,b)=>first.split(b).length-first.split(a).length)[0];
+  const rows=[]; let row=[], field='', q=false;
+  for(let i=0;i<text.length;i++){ const ch=text[i]; if(q){ if(ch==='"'&&text[i+1]==='"'){field+='"';i++;} else if(ch==='"')q=false; else field+=ch; }
+    else if(ch==='"')q=true; else if(ch===delim){row.push(field);field='';} else if(ch==='\n'){row.push(field.replace(/\r$/,''));rows.push(row);row=[];field='';} else field+=ch;
+  } row.push(field.replace(/\r$/,'')); if(row.some(x=>x!=='')) rows.push(row); return [{name:'CSV',rows}];
+}
+
+function sheetRowsToObjects(matrix){
+  let hi=matrix.findIndex(r=>r && r.some(v=>clean(v)!=='')); if(hi<0) throw new Error('Лист пуст.');
+  const headers=(matrix[hi]||[]).map(v=>norm(v)); const positions={}; REQUIRED_COLS.forEach(c=>positions[c]=headers.indexOf(c));
+  const missing=REQUIRED_COLS.filter(c=>positions[c]<0); if(missing.length) throw new Error('Не найдены обязательные колонки: '+missing.join(', '));
+  const out=[]; for(let i=hi+1;i<matrix.length;i++){ const r=matrix[i]||[]; const eduid=clean(r[positions.eduid]); if(!eduid) continue; out.push({
+    eduid, num_phrase:Number(r[positions.num_phrase]), node_id:clean(r[positions.node_id]), value:clean(r[positions.value]), payload_label:cleanLabel(r[positions.payload_label]), _row:i+1
+  }); }
+  return out;
+}
+function buildSessions(rows){
+  const map=new Map(); for(const r of rows){ if(!map.has(r.eduid))map.set(r.eduid,[]); map.get(r.eduid).push(r); }
+  const sessions=[]; for(const [eduid,rs] of map){ rs.sort((a,b)=>((Number.isFinite(a.num_phrase)?a.num_phrase:1e15)-(Number.isFinite(b.num_phrase)?b.num_phrase:1e15)) || a._row-b._row);
+    const scoreHits=rs.map((r,i)=>({i,r,score:SCORE_MAP.get(normLabel(r.payload_label))})).filter(x=>x.score!=null); const distinct=[...new Set(scoreHits.map(x=>x.score))]; const rating=scoreHits.length?scoreHits[scoreHits.length-1].score:null;
+    sessions.push({eduid,rows:rs,rating,scoreHits,conflict:distinct.length>1,hasTarget:rs.some(r=>clean(r.node_id)===TARGET_NODE)});
+  }
+  return sessions;
+}
+
+async function loadFile(file){
+  showMsg('Читаю файл…','statusline');
+  try{
+    let sheets; const name=file.name.toLowerCase(); if(name.endsWith('.xlsx')) sheets=await parseXlsx(file); else if(name.endsWith('.csv')||name.endsWith('.txt')) sheets=parseDelimited(await file.text()); else throw new Error('Поддерживаются .xlsx и .csv. Формат .xls сохраните как .xlsx.');
+    state.workbook=sheets; const sel=$('sheetSelect'); sel.innerHTML=sheets.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join(''); $('sheetBox').classList.toggle('hidden',sheets.length<=1);
+    analyzeSheet(0); showMsg(`<b>${esc(file.name)}</b> загружен. Листов: ${sheets.length}.`,'statusline');
+  }catch(e){ console.error(e); showMsg(esc(e.message||e),'error'); $('dashboard').classList.add('hidden'); }
+}
+function analyzeSheet(index){
+  try{ const rows=sheetRowsToObjects(state.workbook[index].rows), sessions=buildSessions(rows); state.sessions=sessions; state.totalSessions=sessions.length; state.retained=sessions.filter(s=>s.hasTarget); $('dashboard').classList.remove('hidden'); setupRatingControls(); renderAll(); }
+  catch(e){ console.error(e); showMsg(esc(e.message||e),'error'); $('dashboard').classList.add('hidden'); }
+}
+
+function ratingCounts(){ const c={1:0,2:0,3:0,4:0,5:0,none:0}; state.retained.forEach(s=>s.rating==null?c.none++:c[s.rating]++); return c; }
+function setupRatingControls(){ const c=ratingCounts();
+  $('ratingPills').innerHTML=[1,2,3,4,5].map(r=>`<span class="pill">Оценка ${r}: <b>${fmt(c[r])}</b></span>`).join('')+`<span class="pill">Нет оценки: <b>${fmt(c.none)}</b></span>`;
+  $('ratingChecks').innerHTML=[1,2,3,4,5,'none'].map((r,i)=>`<label class="check"><input type="checkbox" value="${r}" ${r===1||r===5?'checked':''}> ${r==='none'?'Нет оценки':'Оценка '+r} <span class="muted">(${fmt(c[r])})</span></label>`).join('');
+}
+function getMode(){return $('modeSelect').value}
+function selectedGroups(){
+  if(getMode()==='single'){ const v=$('singleRating').value; let ss=state.retained; if(v==='none')ss=ss.filter(s=>s.rating==null); else if(v!=='all')ss=ss.filter(s=>s.rating===Number(v)); return [{key:v,label:v==='all'?'Все сессии':v==='none'?'Нет оценки':'Оценка '+v,sessions:ss}]; }
+  const vals=[...$('ratingChecks').querySelectorAll('input:checked')].map(x=>x.value); return vals.map(v=>({key:v,label:v==='none'?'Нет оценки':'Оценка '+v,sessions:state.retained.filter(s=>v==='none'?s.rating==null:s.rating===Number(v))}));
+}
+function currentUnion(groups){ const set=new Set(); groups.forEach(g=>g.sessions.forEach(s=>set.add(s.eduid))); return state.retained.filter(s=>set.has(s.eduid)); }
+
+function renderAll(){
+  const groups=selectedGroups(), union=currentUnion(groups), rated=state.retained.filter(s=>s.rating!=null).length, conflicts=state.retained.filter(s=>s.conflict).length;
+  $('mTotal').textContent=fmt(state.totalSessions); $('mKept').textContent=fmt(state.retained.length); $('mRated').textContent=fmt(rated); $('mCurrent').textContent=fmt(union.length);
+  $('keptStatus').innerHTML=`Для анализа оставлено <b>${fmt(state.retained.length)} из ${fmt(state.totalSessions)}</b> сессий (${pct(state.retained.length,state.totalSessions)}): только те, где встречается <b>${esc(TARGET_NODE)}</b>.`;
+  $('conflictWarning').classList.toggle('hidden',!conflicts); $('conflictWarning').innerHTML=conflicts?`Конфликт оценок найден в <b>${fmt(conflicts)}</b> сессиях. Для фильтра используется последняя распознанная оценка по num_phrase.`:'';
+  renderSankeyArea('topicSankey',groups,'topic'); renderSankeyArea('nodeSankey',groups,'node'); renderTop('topTopics',groups,'topic'); renderTop('topNodes',groups,'node'); renderChainTable(); renderQuality(union);
+}
+function seqFor(s,dim){ return s.rows.map(r=>displayVal(dim==='topic'?r.payload_label:r.node_id)); }
+
+function buildFlow(sessions,dim,depth,topN){
+  const raw=sessions.map(s=>seqFor(s,dim).slice(0,depth)).filter(x=>x.length); const stages=[]; for(const seq of raw)for(let i=0;i<seq.length;i++){ if(!stages[i])stages[i]=new Map(); stages[i].set(seq[i],(stages[i].get(seq[i])||0)+1); }
+  const keep=stages.map(m=>new Set([...m.entries()].sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0],'ru')).slice(0,topN).map(x=>x[0])));
+  const mapped=raw.map(seq=>seq.map((v,i)=>keep[i]&&keep[i].has(v)?v:'Другие'));
+  const nodes=new Map(), links=new Map();
+  for(const seq of mapped){ for(let i=0;i<seq.length;i++){ const key=i+'\u0000'+seq[i]; if(!nodes.has(key))nodes.set(key,{key,stage:i,label:seq[i],value:0}); nodes.get(key).value++; if(i<seq.length-1){ const a=key,b=(i+1)+'\u0000'+seq[i+1],lk=a+'\u0001'+b; if(!links.has(lk))links.set(lk,{source:a,target:b,value:0}); links.get(lk).value++; } } }
+  return {nodes:[...nodes.values()],links:[...links.values()],stageCount:stages.length,rawCount:raw.length};
+}
+function sankeySvg(sessions,dim){
+  if(!sessions.length)return '<div class="sankey-empty">Нет сессий для выбранной оценки.</div>';
+  const depth=Math.max(2,Math.min(30,Number($('depthInput').value)||12)), topN=Math.max(3,Math.min(30,Number($('topStageInput').value)||12)); const f=buildFlow(sessions,dim,depth,topN); if(!f.nodes.length)return '<div class="sankey-empty">Нет данных для Sankey.</div>';
+  const byStage=[]; f.nodes.forEach(n=>(byStage[n.stage]??=[]).push(n)); byStage.forEach(a=>a.sort((x,y)=>y.value-x.value||x.label.localeCompare(y.label,'ru')));
+  const stageGap=190, left=18, nodeW=14, top=28, bottom=24, maxNodes=Math.max(...byStage.map(x=>x.length)); const H=Math.max(400,Math.min(920,Math.max(maxNodes*34+70,480))); const W=Math.max(720,left*2+Math.max(1,f.stageCount-1)*stageGap+200);
+  const pos=new Map(); for(let st=0;st<byStage.length;st++){ const arr=byStage[st]||[]; const total=arr.reduce((a,n)=>a+n.value,0); const pad=10, usable=H-top-bottom-Math.max(0,arr.length-1)*pad; let y=top; for(const n of arr){ const h=Math.max(5,usable*(n.value/Math.max(1,total))); pos.set(n.key,{x:left+st*stageGap,y,h,w:nodeW,out:0,inc:0,node:n}); y+=h+pad; } }
+  const linkEls=[]; const sortedLinks=[...f.links].sort((a,b)=>b.value-a.value); for(const l of sortedLinks){ const s=pos.get(l.source),t=pos.get(l.target); if(!s||!t)continue; const sw=s.h*(l.value/s.node.value),tw=t.h*(l.value/t.node.value), sy=s.y+s.out+sw/2, ty=t.y+t.inc+tw/2; s.out+=sw;t.inc+=tw; const x1=s.x+nodeW,x2=t.x,mx=(x1+x2)/2; const color=hashColor(s.node.label); linkEls.push(`<path d="M${x1.toFixed(1)},${sy.toFixed(1)} C${mx.toFixed(1)},${sy.toFixed(1)} ${mx.toFixed(1)},${ty.toFixed(1)} ${x2.toFixed(1)},${ty.toFixed(1)}" fill="none" stroke="${color}" stroke-opacity=".22" stroke-width="${Math.max(1,Math.min(sw,tw)).toFixed(1)}"><title>${esc(s.node.label)} → ${esc(t.node.label)}: ${l.value} сесс.</title></path>`); }
+  const nodeEls=[]; for(const n of f.nodes){ const p=pos.get(n.key); const label=n.label.length>26?n.label.slice(0,25)+'…':n.label; nodeEls.push(`<g><rect x="${p.x}" y="${p.y}" width="${nodeW}" height="${p.h}" rx="2" fill="${hashColor(n.label)}"><title>Шаг ${n.stage+1}: ${esc(n.label)} — ${n.value} сесс.</title></rect><text x="${p.x+nodeW+5}" y="${Math.min(H-7,p.y+Math.min(p.h/2+4,15))}" font-size="11" fill="#334155">${esc(label)} <tspan fill="#94a3b8">${n.value}</tspan></text></g>`); }
+  return `<div class="sankey-wrap"><svg class="sankey" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${linkEls.join('')}${nodeEls.join('')}</svg></div><div class="muted small" style="margin-top:6px">Показаны первые ${Math.min(depth,f.stageCount)} шагов; максимум ${topN} значений на шаг + «Другие».</div>`;
+}
+function renderSankeyArea(id,groups,dim){ const el=$(id); if(getMode()==='single'){el.innerHTML=sankeySvg(groups[0]?.sessions||[],dim);return;} if(!groups.length){el.innerHTML='<div class="warning">Выберите хотя бы одну оценку для сравнения.</div>';return;} el.innerHTML=`<div class="compare-grid">${groups.map(g=>`<div class="compare-card"><h4>${esc(g.label)} — ${fmt(g.sessions.length)} сесс.</h4>${sankeySvg(g.sessions,dim)}</div>`).join('')}</div>`; }
+
+function uniqueTop(sessions,dim){
+  const m=new Map(), includeCsi = !$('includeCsiTop') || $('includeCsiTop').checked;
+  sessions.forEach(s=>{
+    const values=seqFor(s,dim).filter(v=>dim!=='node' || includeCsi || !CSI_NODES.has(clean(v)));
+    const set=new Set(values);
+    set.forEach(v=>m.set(v,(m.get(v)||0)+1));
+  });
+  return [...m.entries()].map(([label,count])=>({label,count,share:sessions.length?count/sessions.length:0})).sort((a,b)=>b.count-a.count||a.label.localeCompare(b.label,'ru'));
+}
+function topListHtml(sessions,dim,limit=15){ const arr=uniqueTop(sessions,dim).slice(0,limit), max=arr[0]?.count||1; if(!arr.length)return '<div class="muted">Нет данных.</div>'; return `<div class="top-list">${arr.map(x=>`<div class="top-item"><div title="${esc(x.label)}">${esc(x.label)}</div><div class="barbg"><div class="barfill" style="width:${100*x.count/max}%"></div></div><div class="num"><b>${fmt(x.count)}</b> · ${pct(x.count,sessions.length)}</div></div>`).join('')}</div>`; }
+function topTableHtml(sessions,dim,limit=15){ const arr=uniqueTop(sessions,dim).slice(0,limit); if(!arr.length)return '<div class="muted" style="padding:12px">Нет данных.</div>'; return `<div class="table-scroll" style="max-height:440px;border:0;border-radius:0"><table class="top-table"><thead><tr><th class="rank-col">#</th><th>${dim==='topic'?'Тематика':'Точка'}</th><th>Сессий</th><th>Доля</th></tr></thead><tbody>${arr.map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.label)}</td><td><b>${fmt(x.count)}</b></td><td>${pct(x.count,sessions.length)}</td></tr>`).join('')}</tbody></table></div>`; }
+function renderTop(id,groups,dim){ const el=$(id); if(getMode()==='single'){el.innerHTML=topListHtml(groups[0]?.sessions||[],dim);return;} if(!groups.length){el.innerHTML='<div class="muted">Выберите оценки.</div>';return;} el.innerHTML=`<div class="rating-top-row">${groups.map(g=>`<div class="rating-top-block"><div class="rating-top-head"><b>${esc(g.label)}</b><span>${fmt(g.sessions.length)} сесс.</span></div>${topTableHtml(g.sessions,dim)}</div>`).join('')}</div>`; }
+
+function groupedChainsFor(sessions,dim,groupLabel=null){ const m=new Map(); for(const s of sessions){ const ch=seqFor(s,dim).join(' → '); if(!m.has(ch))m.set(ch,{chain:ch,count:0,ids:[]}); const x=m.get(ch);x.count++; if(x.ids.length<5)x.ids.push(s.eduid); } return [...m.values()].map(x=>({...x,share:sessions.length?x.count/sessions.length:0,rating:groupLabel})).sort((a,b)=>b.count-a.count||a.chain.localeCompare(b.chain,'ru')); }
+function buildChainRows(){ const groups=selectedGroups(), dim=state.chainTab; return getMode()==='single'?groupedChainsFor(groups[0]?.sessions||[],dim,null):groups.flatMap(g=>groupedChainsFor(g.sessions,dim,g.label)); }
+function renderChainTable(){ const all=buildChainRows(), q=norm($('chainSearch').value); const rows=q?all.filter(x=>norm(x.chain).includes(q)):all; state.currentChainRows=rows; $('chainCount').textContent=`Показано ${fmt(Math.min(rows.length,300))} из ${fmt(rows.length)} цепочек`;
+  const compare=getMode()==='compare'; const view=rows.slice(0,300); $('chainTable').innerHTML=`<table><thead><tr>${compare?'<th>Оценка</th>':''}<th>Цепочка</th><th class="nowrap">Сессий</th><th class="nowrap">Доля</th><th>Пример eduid</th></tr></thead><tbody>${view.map(x=>`<tr>${compare?`<td class="nowrap">${esc(x.rating)}</td>`:''}<td class="chain">${esc(x.chain)}</td><td><b>${fmt(x.count)}</b></td><td>${(x.share*100).toFixed(1)}%</td><td>${esc(x.ids.join(', '))}</td></tr>`).join('')}</tbody></table>`; }
+function csvEscape(v){ const s=String(v??''); return /[";,\n\r]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; }
+function exportChainCsv(){ const compare=getMode()==='compare'; const head=[...(compare?['Оценка']:[]),'Цепочка','Сессий','Доля','Пример eduid']; const lines=[head,...state.currentChainRows.map(x=>[...(compare?[x.rating]:[]),x.chain,x.count,(x.share*100).toFixed(2)+'%',x.ids.join(', ')])].map(r=>r.map(csvEscape).join(';')).join('\r\n'); const blob=new Blob(['\ufeff'+lines],{type:'text/csv;charset=utf-8'}); const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`csat_chains_${state.chainTab}.csv`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+
+function renderQuality(union){ const badNum=state.retained.reduce((a,s)=>a+s.rows.filter(r=>!Number.isFinite(r.num_phrase)).length,0), blankTopic=state.retained.reduce((a,s)=>a+s.rows.filter(r=>!clean(r.payload_label)).length,0), blankNode=state.retained.reduce((a,s)=>a+s.rows.filter(r=>!clean(r.node_id)).length,0), conflicts=state.retained.filter(s=>s.conflict).length, noRating=state.retained.filter(s=>s.rating==null).length;
+  const items=[['Строки с некорректным num_phrase',badNum],['Пустой payload_label',blankTopic],['Пустой node_id',blankNode],['Сессии с несколькими разными оценками',conflicts],['Сессии без распознанной оценки',noRating]];
+  $('quality').innerHTML=`<div class="grid grid-4">${items.map(([l,v])=>`<div style="border:1px solid var(--line);border-radius:10px;padding:12px"><div style="font-size:22px;font-weight:800">${fmt(v)}</div><div class="muted small">${esc(l)}</div></div>`).join('')}</div><div class="muted small" style="margin-top:9px">Метрики качества считаются по ${fmt(state.retained.length)} сессиям, прошедшим обязательную CSAT-точку. Текущий фильтр содержит ${fmt(union.length)} сессий.</div>`; }
+
+// events
+$('fileInput').addEventListener('change',e=>e.target.files[0]&&loadFile(e.target.files[0]));
+$('sheetSelect').addEventListener('change',e=>analyzeSheet(Number(e.target.value)));
+const drop=$('drop'); ['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('drag')})); ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('drag')})); drop.addEventListener('drop',e=>e.dataTransfer.files[0]&&loadFile(e.dataTransfer.files[0]));
+$('modeSelect').addEventListener('change',()=>{ const cmp=getMode()==='compare'; $('singleBox').classList.toggle('hidden',cmp); $('compareBox').classList.toggle('hidden',!cmp); renderAll(); });
+$('singleRating').addEventListener('change',renderAll); $('ratingChecks').addEventListener('change',renderAll); $('depthInput').addEventListener('change',renderAll); $('topStageInput').addEventListener('change',renderAll); $('includeCsiTop').addEventListener('change',()=>{ renderTop('topNodes',selectedGroups(),'node'); }); $('chainSearch').addEventListener('input',renderChainTable); $('exportCsv').addEventListener('click',exportChainCsv);
+document.querySelectorAll('[data-chain-tab]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('[data-chain-tab]').forEach(x=>x.classList.remove('active'));b.classList.add('active');state.chainTab=b.dataset.chainTab;renderChainTable();}));
+// Независимая подсветка строк во всех динамически создаваемых таблицах.
+// Можно выделить любое количество строк одновременно; повторный клик снимает выделение только с выбранной строки.
+document.addEventListener('click',e=>{
+  const row=e.target.closest('tbody tr');
+  if(!row || !row.closest('table')) return;
+  row.classList.toggle('row-selected');
+});
+</script>
+</body>
+</html>
