@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Прогноз CSI</title>
+  <style>
+    :root{
+      --bg:#f4f5f1;
+      --card:#ffffff;
+      --text:#171a18;
+      --muted:#70776f;
+      --line:#e3e7e1;
+      --green:#1faa59;
+      --green-2:#3ec66f;
+      --green-soft:#edf8f0;
+      --forecast:#3169df;
+      --yellow:#e4bd3d;
+      --red:#dc6b5b;
+      --shadow:0 12px 30px rgba(31,48,37,.06);
+      --radius:18px;
+    }
+
+    *{box-sizing:border-box}
+    html{background:var(--bg)}
+    body{
+      margin:0;
+      color:var(--text);
+      background:
+        radial-gradient(circle at 78% -10%, rgba(31,170,89,.07), transparent 30%),
+        var(--bg);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      line-height:1.45;
+    }
+
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+
+    .app{max-width:1360px;margin:0 auto;padding:28px 22px 46px}
+
+    .topbar{
+      display:flex;align-items:flex-start;justify-content:flex-end;gap:20px;margin-bottom:22px;
+    }
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:12px;padding:10px 14px;font-weight:750;box-shadow:0 3px 10px rgba(20,30,24,.03)}
+    .btn:hover{border-color:#cbd2ca}
+    .btn.primary{background:var(--text);color:#fff;border-color:var(--text)}
+
+    .layout{display:grid;grid-template-columns:minmax(350px,380px) minmax(0,1fr);gap:18px;align-items:start}
+    .panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .sidebar{display:grid;gap:18px;align-self:start}
+    .controls{padding:18px}
+    .section{padding:18px}
+    .section + .section{border-top:1px solid var(--line)}
+    .section-head{display:flex;align-items:center;justify-content:flex-start;gap:12px;margin-bottom:13px}
+    .section-title{margin:0;font-size:16px;letter-spacing:-.015em}
+
+    .ratings{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+    .ratings .field{min-width:0}
+    .ratings input{min-width:0;padding:10px 7px;font-variant-numeric:tabular-nums}
+    .field label{display:block;font-size:11px;color:var(--muted);font-weight:800;margin:0 0 5px}
+    .field input,.field select{
+      width:100%;border:1px solid var(--line);background:#fff;border-radius:11px;padding:10px 10px;color:var(--text);outline:none;
+    }
+    .field input:focus,.field select:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(31,170,89,.11)}
+    input[type="number"]{-moz-appearance:textfield}
+    input[type="number"]::-webkit-outer-spin-button,input[type="number"]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+    .rating-label{text-align:center}
+
+    .control-row{display:grid;grid-template-columns:1fr 82px;gap:10px;align-items:end;margin-top:14px}
+    .control-row:first-of-type{margin-top:0}
+    .slider-wrap label,.field-block label{display:block;font-size:12px;color:var(--muted);font-weight:800;margin-bottom:7px}
+    input[type="range"]{
+      --fill:0%;
+      width:100%;
+      height:6px;
+      margin:7px 0;
+      padding:0;
+      border:0;
+      border-radius:999px;
+      outline:none;
+      appearance:none;
+      -webkit-appearance:none;
+      background:linear-gradient(to right,var(--green) 0 var(--fill),#dfe4de var(--fill) 100%);
+    }
+    input[type="range"]::-webkit-slider-runnable-track{height:6px;border:0;border-radius:999px;background:transparent}
+    input[type="range"]::-webkit-slider-thumb{
+      width:16px;height:16px;margin-top:-5px;border:0;border-radius:50%;
+      background:var(--green);box-shadow:none;appearance:none;-webkit-appearance:none;cursor:pointer;
+    }
+    input[type="range"]::-moz-range-track{height:6px;border:0;border-radius:999px;background:#dfe4de}
+    input[type="range"]::-moz-range-progress{height:6px;border-radius:999px;background:var(--green)}
+    input[type="range"]::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:var(--green);box-shadow:none;cursor:pointer}
+    .number-box{position:relative}
+    .number-box input{padding-right:27px}
+    .number-box span{position:absolute;right:10px;bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+    .scenario-line{margin-top:14px;padding:11px 12px;background:var(--green-soft);border-radius:12px;color:#28633f;font-size:12px}
+    .scenario-line strong{color:#164d2d}
+
+    .main{display:grid;gap:18px}
+    .hero-card{padding:22px 24px;display:grid;grid-template-columns:minmax(205px,.6fr) minmax(420px,1.4fr);gap:4px;min-height:296px;overflow:hidden}
+    .hero-copy{display:flex;flex-direction:column;justify-content:center;padding:12px 2px 12px 4px}
+    .metric-label{font-size:13px;color:var(--muted);font-weight:800}
+    .big-number{display:flex;align-items:flex-end;gap:8px;margin-top:9px}
+    .big-number .value{font-size:58px;font-weight:900;letter-spacing:-.065em;line-height:.9;font-variant-numeric:tabular-nums}
+    .delta{font-size:15px;font-weight:850;color:var(--green);padding-bottom:5px;font-variant-numeric:tabular-nums}
+    .metric-name{margin-top:12px;color:var(--muted);font-size:13px;font-weight:750}
+    .current-reference{margin-top:24px;padding-top:15px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+    .current-reference strong{display:block;margin-top:2px;color:var(--text);font-size:16px;font-weight:850;font-variant-numeric:tabular-nums}
+
+    .gauge-wrap{position:relative;display:flex;align-items:center;justify-content:center;min-height:250px;padding:0}
+    .gauge{width:min(100%,620px);overflow:visible}
+    .gauge-track,.gauge-fill{fill:none;stroke-width:38}
+    .gauge-track{stroke:#e4e9e3;stroke-linecap:butt}
+    .gauge-fill{transition:opacity .2s ease}
+    .gauge-fill-forecast{stroke:var(--forecast);stroke-linecap:butt}
+    .gauge-fill-current{stroke:var(--green);stroke-linecap:butt}
+    .gauge-start-cap{fill:var(--green);transition:opacity .2s ease}
+    .gauge-guide{stroke-width:2;stroke-linecap:round;transition:.25s ease}
+    .gauge-guide-current{stroke:#58615a}
+    .gauge-guide-forecast{stroke:var(--forecast);stroke-dasharray:3 5}
+    .gauge-pointer{fill:#111814;transition:transform .25s ease;transform-box:fill-box;transform-origin:center}
+    .gauge-current-value{font-size:14px;font-weight:800;fill:#58615a;font-variant-numeric:tabular-nums}
+    .gauge-value-svg{font-size:23px;font-weight:850;fill:var(--forecast);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+
+    .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .stat{padding:16px}
+    .stat .k{font-size:12px;color:var(--muted);font-weight:750}
+    .stat .v{font-size:26px;font-weight:900;letter-spacing:-.035em;margin-top:5px}
+    .stat .s{font-size:12px;color:var(--muted);margin-top:3px}
+
+    .analytics{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch}
+    .dist-card{padding:20px 22px}
+    .card-title{margin:0;font-size:16px;letter-spacing:-.015em}
+    .card-sub{margin:5px 0 0;color:var(--muted);font-size:12px}
+
+    .dist-rows{margin-top:18px;display:grid;gap:16px}
+    .dist-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center}
+    .dist-row .name{font-size:12px;color:var(--muted);font-weight:750}
+    .bar{height:24px;border-radius:999px;background:#eef1ec;overflow:hidden;display:flex}
+    .bar-seg{height:100%;display:flex;align-items:center;justify-content:center;min-width:0;overflow:hidden;transition:width .25s ease}
+    .bar-seg span{display:block;white-space:nowrap;font-size:10px;line-height:1;font-weight:850;font-variant-numeric:tabular-nums}
+    .seg5{background:var(--green);color:#fff}
+    .seg4{background:var(--yellow);color:#4d4115}
+    .seg13{background:var(--red);color:#fff}
+    .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;font-size:11px;color:var(--muted)}
+    .legend span{display:inline-flex;align-items:center;gap:6px}
+    .legend i{width:8px;height:8px;border-radius:50%;display:inline-block}
+
+    .calc-card{padding:20px;display:flex;flex-direction:column}
+    .calc-intro{margin:5px 0 0;color:var(--muted);font-size:12px}
+    .calc-steps{display:grid;gap:0;margin-top:15px}
+    .calc-step{padding:12px 0;border-top:1px solid var(--line)}
+    .calc-step:first-child{border-top:0;padding-top:0}
+    .calc-label{display:flex;align-items:baseline;gap:7px;color:var(--muted);font-size:11px;font-weight:800}
+    .calc-label b{color:var(--green);font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+    .calc-equation{margin-top:5px;color:var(--text);font-size:13px;line-height:1.45}
+    .calc-equation strong{font-weight:850;font-variant-numeric:tabular-nums}
+    .calc-result{margin-top:auto;padding:13px 14px;border-radius:13px;background:var(--green-soft);color:#28633f;font-size:12px}
+    .calc-result strong{display:block;margin-top:2px;color:#164d2d;font-size:20px;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+    .error{display:none;margin-top:12px;padding:10px 12px;border-radius:11px;background:#fff0ef;color:#a64137;font-size:12px}
+
+    .toast{position:fixed;right:22px;bottom:22px;background:#182019;color:#fff;padding:11px 14px;border-radius:12px;font-size:13px;font-weight:750;opacity:0;transform:translateY(8px);pointer-events:none;transition:.2s;box-shadow:var(--shadow)}
+    .toast.show{opacity:1;transform:none}
+
+    @media(max-width:1080px){
+      .layout{grid-template-columns:1fr}
+    }
+    @media(max-width:720px){
+      .app{padding:18px 12px 34px}
+      .top-actions{width:100%;justify-content:flex-end}
+      .ratings{grid-template-columns:repeat(5,minmax(0,1fr));gap:5px}
+      .ratings input{padding:9px 4px;font-size:13px}
+      .cards{grid-template-columns:1fr 1fr}
+      .hero-card{grid-template-columns:1fr;min-height:auto}
+      .hero-copy{text-align:center;align-items:center;padding:8px 0 0}
+      .current-reference{width:100%;max-width:280px}
+      .gauge-wrap{min-height:220px}
+    }
+    @media(max-width:460px){
+      .cards{grid-template-columns:1fr}
+      .big-number .value{font-size:50px}
+      .control-row{grid-template-columns:1fr 76px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="top-actions">
+        <button class="btn" id="resetBtn" type="button">Сбросить</button>
+        <button class="btn primary" id="copyBtn" type="button">Скопировать прогноз</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <div class="sidebar">
+        <aside class="panel controls">
+        <div class="section">
+          <div class="section-head">
+            <h2 class="section-title">Исходная база</h2>
+          </div>
+          <div class="ratings">
+            <div class="field"><label class="rating-label" for="r1">1 ★</label><input id="r1" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="780"></div>
+            <div class="field"><label class="rating-label" for="r2">2 ★</label><input id="r2" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="126"></div>
+            <div class="field"><label class="rating-label" for="r3">3 ★</label><input id="r3" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="240"></div>
+            <div class="field"><label class="rating-label" for="r4">4 ★</label><input id="r4" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="691"></div>
+            <div class="field"><label class="rating-label" for="r5">5 ★</label><input id="r5" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="8622"></div>
+          </div>
+        </div>
+
+        <div class="section">
+          <div class="section-head">
+            <h2 class="section-title">Параметры прогноза</h2>
+          </div>
+
+          <div class="control-row">
+            <div class="slider-wrap">
+              <label for="problemRange">Проблема среди оценок 1–3</label>
+              <input id="problemRange" type="range" min="0" max="100" step="1" value="38">
+            </div>
+            <div class="field number-box"><input id="problem" type="number" min="0" max="100" step="1" value="38"><span>%</span></div>
+          </div>
+
+          <div class="control-row">
+            <div class="slider-wrap">
+              <label for="effectRange">Эффект меры среди клиентов с проблемой</label>
+              <input id="effectRange" type="range" min="0" max="100" step="1" value="15">
+            </div>
+            <div class="field number-box"><input id="effect" type="number" min="0" max="100" step="1" value="15"><span>%</span></div>
+          </div>
+
+          <div class="scenario-line" id="scenarioLine">Реально изменится <strong>5,70%</strong> клиентов внутри группы 1–3.</div>
+          <div id="error" class="error"></div>
+        </div>
+        </aside>
+
+        <section class="panel calc-card" aria-labelledby="calcTitle">
+          <h3 class="card-title" id="calcTitle">Как считается прогноз</h3>
+          <p class="calc-intro">Цепочка расчёта на текущих параметрах.</p>
+
+          <div class="calc-steps">
+            <div class="calc-step">
+              <div class="calc-label"><b>Шаг 1</b> Находим клиентов с проблемой</div>
+              <div class="calc-equation"><strong id="calcLow">1 146</strong> оценок 1–3 × <strong id="calcProblemPct">38%</strong> = <strong id="calcProblemClients">435</strong></div>
+            </div>
+
+            <div class="calc-step">
+              <div class="calc-label"><b>Шаг 2</b> Учитываем эффект меры</div>
+              <div class="calc-equation"><strong id="calcProblemBase">435</strong> клиентов × <strong id="calcEffectPct">15%</strong> = <strong id="calcChanged">65</strong> изменят оценку</div>
+            </div>
+
+            <div class="calc-step">
+              <div class="calc-label"><b>Шаг 3</b> Переносим оценки</div>
+              <div class="calc-equation"><strong id="calcStep3ProblemPct">38%</strong> × <strong id="calcStep3EffectPct">15%</strong> = <strong id="calcEffectivePct">5,70%</strong> группы 1–3 перейдут в оценку 5.</div>
+            </div>
+
+            <div class="calc-step">
+              <div class="calc-label"><b>Шаг 4</b> Пересчитываем среднее</div>
+              <div class="calc-equation">(<strong id="calcCurrentPoints">47 626</strong> + <strong id="calcGainPoints">227</strong>) ÷ <strong id="calcTotal">10 459</strong> = <strong id="calcForecast">4,575</strong></div>
+            </div>
+          </div>
+
+          <div class="calc-result">
+            Итоговый рост CSI
+            <strong id="calcDelta">+0,022</strong>
+          </div>
+        </section>
+      </div>
+
+      <section class="main">
+        <div class="panel hero-card">
+          <div class="hero-copy">
+            <div class="metric-label">Прогноз после меры</div>
+            <div class="big-number">
+              <div class="value" id="forecastHero">4,575</div>
+              <div class="delta" id="deltaCSI">+0,022</div>
+            </div>
+            <div class="metric-name">CSI · средняя оценка</div>
+            <div class="current-reference">
+              Сейчас
+              <strong id="currentCSI">4,554</strong>
+            </div>
+          </div>
+
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 440 240" aria-label="Прогноз CSI">
+              <path class="gauge-track" d="M 25 200 A 165 165 0 0 1 355 200" />
+              <path id="gaugeCurrentFill" class="gauge-fill gauge-fill-current" d="" />
+              <circle id="gaugeStartCap" class="gauge-start-cap" cx="25" cy="200" r="19" />
+              <path id="gaugeForecastFill" class="gauge-fill gauge-fill-forecast" d="" />
+              <line id="gaugeCurrentGuide" class="gauge-guide gauge-guide-current" x1="360" y1="132" x2="391" y2="125" />
+              <line id="gaugeForecastGuide" class="gauge-guide gauge-guide-forecast" x1="370" y1="126" x2="425" y2="116" />
+              <polygon id="gaugePointer" class="gauge-pointer" points="-15,-8 16,0 -15,8 -7,0" transform="translate(190 216) rotate(-20)" />
+              <text id="currentGaugeValue" class="gauge-current-value" x="345" y="139" text-anchor="end">4,554</text>
+              <text id="forecastCSI" class="gauge-value-svg" x="438" y="139" text-anchor="end">4,575</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="cards">
+          <div class="panel stat"><div class="k">Ответов</div><div class="v" id="total">10 459</div><div class="s">вся база</div></div>
+          <div class="panel stat"><div class="k">Оценки 1–3</div><div class="v" id="low">1 146</div><div class="s" id="lowShare">10,96% базы</div></div>
+          <div class="panel stat"><div class="k">С проблемой</div><div class="v" id="problemClients">435</div><div class="s" id="problemShare">4,16% всей базы</div></div>
+          <div class="panel stat"><div class="k">Изменят оценку</div><div class="v" id="changedClients">65</div><div class="s" id="changedShare">0,62% всей базы</div></div>
+        </div>
+
+        <div class="analytics">
+          <div class="panel dist-card">
+            <h3 class="card-title">Распределение оценок</h3>
+            <p class="card-sub">Как меняется структура базы после эффекта меры.</p>
+            <div class="dist-rows">
+              <div class="dist-row">
+                <div class="name">Сейчас</div>
+                <div class="bar" aria-label="Распределение сейчас">
+                  <div id="current5" class="bar-seg seg5"><span id="current5Label">82,44%</span></div>
+                  <div id="current4" class="bar-seg seg4"><span id="current4Label">6,61%</span></div>
+                  <div id="current13" class="bar-seg seg13"><span id="current13Label">10,96%</span></div>
+                </div>
+              </div>
+              <div class="dist-row">
+                <div class="name">Прогноз</div>
+                <div class="bar" aria-label="Распределение прогноз">
+                  <div id="forecast5" class="bar-seg seg5"><span id="forecast5Label">83,06%</span></div>
+                  <div id="forecast4" class="bar-seg seg4"><span id="forecast4Label">6,61%</span></div>
+                  <div id="forecast13" class="bar-seg seg13"><span id="forecast13Label">10,34%</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="legend">
+              <span><i style="background:var(--green)"></i>5</span>
+              <span><i style="background:var(--yellow)"></i>4</span>
+              <span><i style="background:var(--red)"></i>1–3</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast">Прогноз скопирован</div>
+
+  <script>
+    (() => {
+      const defaults = {r1:780,r2:126,r3:240,r4:691,r5:8622,problem:38,effect:15};
+      const ids = ['r1','r2','r3','r4','r5','problem','effect'];
+      const el = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+      const pr = document.getElementById('problemRange');
+      const er = document.getElementById('effectRange');
+      const error = document.getElementById('error');
+      const toast = document.getElementById('toast');
+
+      const nf0 = new Intl.NumberFormat('ru-RU', {maximumFractionDigits:0});
+      const nf2 = new Intl.NumberFormat('ru-RU', {minimumFractionDigits:2, maximumFractionDigits:2});
+      const nf3 = new Intl.NumberFormat('ru-RU', {minimumFractionDigits:3, maximumFractionDigits:3});
+
+      const clamp = (v,min,max) => Math.max(min,Math.min(max,v));
+      const val = id => {
+        const v = Number(el[id].value);
+        return Number.isFinite(v) ? Math.max(0,v) : 0;
+      };
+      const pct = x => nf2.format(x*100) + '%';
+      const signed3 = x => (x >= 0 ? '+' : '') + nf3.format(x);
+
+      function csi(counts){
+        const total = counts.reduce((a,b)=>a+b,0);
+        if(total <= 0) return 0;
+        return counts.reduce((s,n,i)=>s+n*(i+1),0)/total;
+      }
+
+      function moveLow(counts, share){
+        const out = counts.slice();
+        let moved = 0;
+        for(let i=0;i<3;i++){
+          const m = out[i] * share;
+          out[i] -= m;
+          moved += m;
+        }
+        out[4] += moved;
+        return out;
+      }
+
+      function setWidths(prefix, counts){
+        const total = counts.reduce((a,b)=>a+b,0) || 1;
+        const shares = {
+          5: counts[4]/total*100,
+          4: counts[3]/total*100,
+          13: (counts[0]+counts[1]+counts[2])/total*100
+        };
+        ['5','4','13'].forEach(key => {
+          const segment = document.getElementById(prefix+key);
+          const label = document.getElementById(prefix+key+'Label');
+          segment.style.width = shares[key] + '%';
+          label.textContent = nf2.format(shares[key]) + '%';
+          label.style.display = shares[key] < 3.5 ? 'none' : 'block';
+        });
+      }
+
+      function updateGauge(currentValue, forecastValue){
+        const currentProgress = clamp((currentValue - 1) / 4, 0, 1);
+        const forecastProgress = clamp((forecastValue - 1) / 4, 0, 1);
+        const cx = 190, cy = 200;
+        const gaugeRadiusX = 165, gaugeRadiusY = 165;
+
+        // Зелёный сегмент показывает текущий CSI, синий — только прирост до прогноза.
+        const forecastFill = document.getElementById('gaugeForecastFill');
+        const currentFill = document.getElementById('gaugeCurrentFill');
+        const startCap = document.getElementById('gaugeStartCap');
+
+        function point(progress, scale){
+          const angle = (180 + progress*180) * Math.PI / 180;
+          return {
+            x:cx + gaugeRadiusX*scale*Math.cos(angle),
+            y:cy + gaugeRadiusY*scale*Math.sin(angle)
+          };
+        }
+
+        function arcPath(startProgress, endProgress){
+          if(endProgress <= startProgress) return '';
+          const start = point(startProgress, 1);
+          const end = point(endProgress, 1);
+          // Вся шкала занимает только 180°, поэтому любой её сегмент — малая SVG-дуга.
+          // large-arc=1 заставляет браузер дорисовывать лишние 200–360° окружности.
+          return `M ${start.x.toFixed(2)} ${start.y.toFixed(2)} A ${gaugeRadiusX} ${gaugeRadiusY} 0 0 1 ${end.x.toFixed(2)} ${end.y.toFixed(2)}`;
+        }
+
+        currentFill.setAttribute('d', arcPath(0, currentProgress));
+        forecastFill.setAttribute('d', arcPath(currentProgress, forecastProgress));
+        currentFill.style.opacity = currentProgress > 0 ? '1' : '0';
+        forecastFill.style.opacity = forecastProgress > currentProgress ? '1' : '0';
+        startCap.style.opacity = currentProgress > 0 ? '1' : '0';
+
+        // Стрелка следует за прогнозом.
+        const pointerAngle = 180 + forecastProgress*180;
+        document.getElementById('gaugePointer').setAttribute('transform', `translate(190 216) rotate(${pointerAngle})`);
+
+        function placeGuide(id, progress, innerScale, outerScale){
+          const start = point(progress, innerScale);
+          const end = point(progress, outerScale);
+          const guide = document.getElementById(id);
+          guide.setAttribute('x1', start.x.toFixed(1));
+          guide.setAttribute('y1', start.y.toFixed(1));
+          guide.setAttribute('x2', end.x.toFixed(1));
+          guide.setAttribute('y2', end.y.toFixed(1));
+        }
+
+        placeGuide('gaugeCurrentGuide', currentProgress, .83, 1.10);
+        placeGuide('gaugeForecastGuide', forecastProgress, .86, 1.06);
+
+        const currentLabel = document.getElementById('currentGaugeValue');
+        const currentLabelPoint = point(currentProgress, .75);
+        const currentLabelLevel = point(currentProgress, 1.22);
+        let currentLabelX = currentLabelPoint.x;
+        let currentAnchor = 'middle';
+        if(currentProgress > .58){ currentAnchor = 'end'; currentLabelX = Math.min(currentLabelX, 345); }
+        else if(currentProgress < .42){ currentAnchor = 'start'; currentLabelX = Math.max(currentLabelX, 95); }
+        const sharedLabelY = currentLabelLevel.y + 7;
+        currentLabel.setAttribute('x', currentLabelX.toFixed(1));
+        currentLabel.setAttribute('y', sharedLabelY.toFixed(1));
+        currentLabel.setAttribute('text-anchor', currentAnchor);
+
+        const valueEl = document.getElementById('forecastCSI');
+        const forecastLabelPoint = point(forecastProgress, 1.22);
+        let lx = forecastLabelPoint.x;
+        let ly = sharedLabelY;
+        let anchor = 'middle';
+        if(forecastProgress > .58){ anchor = 'end'; lx = 438; }
+        else if(forecastProgress < .32){ anchor = 'start'; lx = 10; }
+        valueEl.setAttribute('x', lx.toFixed(1));
+        valueEl.setAttribute('y', ly.toFixed(1));
+        valueEl.setAttribute('text-anchor', anchor);
+      }
+
+      function paintRange(range){
+        const min = Number(range.min) || 0;
+        const max = Number(range.max) || 100;
+        const value = clamp(Number(range.value)||0,min,max);
+        const fill = max === min ? 0 : ((value-min)/(max-min))*100;
+        range.style.setProperty('--fill', fill.toFixed(2) + '%');
+      }
+
+      function syncRange(num, range){
+        range.value = clamp(Number(num.value)||0,0,100);
+        paintRange(range);
+      }
+
+      function render(){
+        const counts = [val('r1'),val('r2'),val('r3'),val('r4'),val('r5')];
+        const total = counts.reduce((a,b)=>a+b,0);
+        const low = counts[0]+counts[1]+counts[2];
+        const problemPct = clamp(Number(el.problem.value)||0,0,100)/100;
+        const effectPct = clamp(Number(el.effect.value)||0,0,100)/100;
+
+        if(total <= 0){
+          error.style.display='block';
+          error.textContent='Сумма оценок должна быть больше нуля.';
+          return;
+        }
+        error.style.display='none';
+
+        const current = csi(counts);
+        const effectiveLowShare = problemPct * effectPct;
+        const forecastCounts = moveLow(counts, effectiveLowShare);
+        const forecast = csi(forecastCounts);
+        const delta = forecast - current;
+        const problemClients = low * problemPct;
+        const changedClients = low * effectiveLowShare;
+        const changedShareTotal = changedClients / total;
+        const currentPoints = counts.reduce((sum,count,index) => sum + count*(index+1), 0);
+        const forecastPoints = forecastCounts.reduce((sum,count,index) => sum + count*(index+1), 0);
+        const gainPoints = forecastPoints - currentPoints;
+
+        document.getElementById('currentCSI').textContent = nf3.format(current);
+        document.getElementById('currentGaugeValue').textContent = nf3.format(current);
+        document.getElementById('forecastHero').textContent = nf3.format(forecast);
+        document.getElementById('forecastCSI').textContent = nf3.format(forecast);
+        document.getElementById('deltaCSI').textContent = signed3(delta);
+
+        document.getElementById('total').textContent = nf0.format(total);
+        document.getElementById('low').textContent = nf0.format(low);
+        document.getElementById('lowShare').textContent = pct(low/total) + ' базы';
+        document.getElementById('problemClients').textContent = nf0.format(problemClients);
+        document.getElementById('problemShare').textContent = pct(problemClients/total) + ' всей базы';
+        document.getElementById('changedClients').textContent = nf0.format(changedClients);
+        document.getElementById('changedShare').textContent = pct(changedShareTotal) + ' всей базы';
+
+        document.getElementById('scenarioLine').innerHTML = 'Реально изменится <strong>' + pct(effectiveLowShare) + '</strong> клиентов внутри группы 1–3.';
+
+        document.getElementById('calcLow').textContent = nf0.format(low);
+        document.getElementById('calcProblemPct').textContent = nf0.format(problemPct*100) + '%';
+        document.getElementById('calcProblemClients').textContent = nf0.format(problemClients);
+        document.getElementById('calcProblemBase').textContent = nf0.format(problemClients);
+        document.getElementById('calcEffectPct').textContent = nf0.format(effectPct*100) + '%';
+        document.getElementById('calcChanged').textContent = nf0.format(changedClients);
+        document.getElementById('calcStep3ProblemPct').textContent = nf0.format(problemPct*100) + '%';
+        document.getElementById('calcStep3EffectPct').textContent = nf0.format(effectPct*100) + '%';
+        document.getElementById('calcEffectivePct').textContent = pct(effectiveLowShare);
+        document.getElementById('calcCurrentPoints').textContent = nf0.format(currentPoints);
+        document.getElementById('calcGainPoints').textContent = nf0.format(gainPoints);
+        document.getElementById('calcTotal').textContent = nf0.format(total);
+        document.getElementById('calcForecast').textContent = nf3.format(forecast);
+        document.getElementById('calcDelta').textContent = signed3(delta);
+
+        setWidths('current', counts);
+        setWidths('forecast', forecastCounts);
+        updateGauge(current, forecast);
+      }
+
+      pr.addEventListener('input', () => { el.problem.value = pr.value; paintRange(pr); render(); });
+      er.addEventListener('input', () => { el.effect.value = er.value; paintRange(er); render(); });
+      el.problem.addEventListener('input', () => { syncRange(el.problem,pr); render(); });
+      el.effect.addEventListener('input', () => { syncRange(el.effect,er); render(); });
+      ['r1','r2','r3','r4','r5'].forEach(id => {
+        el[id].addEventListener('input', () => {
+          const cleaned = el[id].value.replace(/\D+/g,'');
+          if(el[id].value !== cleaned) el[id].value = cleaned;
+          render();
+        });
+      });
+
+      document.getElementById('resetBtn').addEventListener('click', () => {
+        Object.entries(defaults).forEach(([id,v]) => el[id].value = v);
+        pr.value = defaults.problem;
+        er.value = defaults.effect;
+        paintRange(pr);
+        paintRange(er);
+        render();
+      });
+
+      document.getElementById('copyBtn').addEventListener('click', async () => {
+        const counts = [val('r1'),val('r2'),val('r3'),val('r4'),val('r5')];
+        const total = counts.reduce((a,b)=>a+b,0);
+        const low = counts[0]+counts[1]+counts[2];
+        const problemPct = clamp(Number(el.problem.value)||0,0,100)/100;
+        const effectPct = clamp(Number(el.effect.value)||0,0,100)/100;
+        const effective = problemPct*effectPct;
+        const current = csi(counts);
+        const forecast = csi(moveLow(counts,effective));
+        const changed = low*effective;
+        const text = [
+          'Прогноз CSI',
+          'Текущий CSI: ' + nf3.format(current),
+          'Прогноз CSI: ' + nf3.format(forecast),
+          'Изменение: ' + signed3(forecast-current),
+          'Проблема среди 1–3: ' + nf0.format(problemPct*100) + '%',
+          'Эффект меры: ' + nf0.format(effectPct*100) + '%',
+          'Целевая оценка: 5',
+          'Изменят оценку: ' + nf0.format(changed) + ' (' + pct(changed/total) + ' базы)'
+        ].join('\n');
+        try{
+          await navigator.clipboard.writeText(text);
+          toast.classList.add('show');
+          setTimeout(()=>toast.classList.remove('show'),1400);
+        }catch(e){
+          window.prompt('Скопируй прогноз:', text);
+        }
+      });
+
+      paintRange(pr);
+      paintRange(er);
+      render();
+    })();
+  </script>
+</body>
+</html>
