@@ -21,7 +21,13 @@ button{cursor:pointer}
 .upload:hover{background:#20538d}.upload.drag{background:#245f9f;border-color:#8fc0ff}.upload input{display:none}
 .file-name{font-size:11px;color:#91a7c0;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
 .search,.sort{height:36px;border:1px solid #40556e;background:#152840;border-radius:8px;color:#e6f0fc;padding:0 11px;outline:none}
-.search{width:220px}#client-search{width:170px}.phrase-search{width:235px}.sort{width:198px}.message-scope{width:180px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
+.search{width:220px}#client-search{width:170px}.phrase-search{width:235px}.sort{width:198px}.message-scope{width:200px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
+.length-panel{max-width:1444px;margin:0 auto 12px;padding:10px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#1d3148;border:2px solid #6c829a;border-radius:10px}.length-panel strong{font-size:12px;white-space:nowrap;margin-right:5px}.length-role{width:215px}.length-query{width:220px}.length-help{color:#c9d7e6;font-size:11px;line-height:1.4;flex:1;min-width:250px}.length-query[aria-invalid="true"]{border-color:#ef7777;box-shadow:0 0 0 2px #ef777744}.length-match{outline:3px solid #f2b545;outline-offset:2px}.length-hit{display:inline-block;margin-top:8px;padding:3px 7px;border-radius:5px;background:#725017;color:#fff1c9;font-size:10px;font-weight:700}
+.rule-panel{max-width:1444px;margin:0 auto 15px;padding:11px 14px;background:#132941;border:2px solid #5e7d9e;border-radius:11px;color:#e8f2fe}
+.rule-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.rule-panel-head strong{font-size:12px}.rule-manage{border:1px solid #7897b7;background:#294663;color:#f0f6ff;border-radius:7px;padding:6px 9px;font-size:11px}.rule-manage:hover{background:#365879}
+.rule-chips{display:flex;flex-wrap:wrap;gap:6px}.rule-chip{border:1px solid #6785a5;background:#213b57;color:#dbe9f8;border-radius:999px;padding:6px 9px;font-size:11px;line-height:1.25}.rule-chip:hover{background:#305578}.rule-chip.active{background:#2b66a0;border-color:#9bcaff;color:#fff}.rule-chip:disabled{opacity:.45;cursor:not-allowed}.rule-chip-count{margin-left:6px;opacity:.8;font-variant-numeric:tabular-nums}.rule-clear{border:0;background:transparent;color:#bcd5ee;font-size:11px;padding:6px 8px}
+.rule-editor{border-top:1px solid #5c7692;margin-top:12px;padding-top:12px;max-height:60vh;overflow:auto}.rule-editor[hidden]{display:none}.rule-help{font-size:11px;line-height:1.5;color:#c3d5e7;margin:0 0 10px}.rule-help code{color:#ffe08a}.rule-actions{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.rule-actions button,.rule-import{border:1px solid #6d8eaf;background:#254560;color:#eff6ff;border-radius:7px;padding:7px 10px;font-size:11px;cursor:pointer}.rule-actions button:hover,.rule-import:hover{background:#345d80}.rule-import input{display:none}.rule-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.rule-edit-card{border:1px solid #5c7c9d;border-radius:8px;background:#1b3551;padding:9px 10px;min-width:0}.rule-edit-card summary{font-size:11px;font-weight:700;cursor:pointer}.rule-fields{display:grid;gap:8px;margin-top:10px}.rule-fields label{font-size:11px;color:#d7e7f7}.rule-name,.rule-patterns{width:100%;background:#0e243b;border:1px solid #6685a4;border-radius:6px;color:#eff6ff;padding:7px 8px;margin-top:3px}.rule-patterns{min-height:100px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.4}.rule-enabled{margin-right:5px}.rule-delete{justify-self:start;border:1px solid #aa6570;border-radius:6px;background:#64303c;color:#fff;padding:5px 9px;font-size:11px}.rule-status{font-size:11px;color:#c8d9ea;margin:10px 0 0}
+.rule-hit{display:inline-block;margin-top:7px;padding:3px 6px;background:#415a77;border:1px solid #7899b9;border-radius:5px;color:#eff7ff;font-size:10px}
 main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .empty{margin:8vh auto 0;max-width:560px;text-align:center;background:#152840;border:1px solid #2c4562;border-radius:14px;padding:40px 30px}
 .empty h2{font-size:19px;margin:0 0 10px}.empty p{color:#a8bdd5;line-height:1.6;margin:0;font-size:13px}
@@ -34,9 +40,9 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .dialog-scroll{min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 15px 18px;scrollbar-color:#99a9ba #e7edf3;scrollbar-width:thin}
 .dialog-scroll:focus{outline:2px solid #81b6ed;outline-offset:-2px}
 .session-block+.session-block{border-top:2px solid #587797;margin-top:24px;padding-top:18px}
-.session-intro{background:#2b4965;border:2px solid #718eaa;border-left:5px solid #91b7dc;border-radius:13px;padding:11px 12px;margin:0 14px 12px;color:#f3f8ff;box-shadow:0 3px 12px #07152955}
-.session-head{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:8px}.session-head strong{font-size:11px}.session-head span{font-size:10px;color:#c1d0e0}
-.session-meta{color:#b5c8dc;font-size:10px;line-height:1.4;overflow-wrap:anywhere}.session-meta b{font-weight:700;color:#e2edf9}
+.session-intro{background:#454b54;border:4px solid #a8b0bb;border-radius:13px;padding:11px 12px;margin:0 14px 12px;color:#f8fafc;box-shadow:0 3px 12px #07152955}
+.session-head{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:8px}.session-head strong{font-size:11px}.session-head span{font-size:10px;color:#d0d5dc}
+.session-meta{color:#d4d9e0;font-size:10px;line-height:1.4;overflow-wrap:anywhere}.session-meta b{font-weight:700;color:#f3f5f7}
 .transcript+.transcript{border-top:1px dashed #435d7a;margin-top:18px;padding-top:13px}.fragment-label{color:#8fa8c3;font-size:10px;margin:0 0 8px}
 .message{display:flex;margin:10px 0;justify-content:flex-start}.message.client-msg{justify-content:flex-end}.bubble{max-width:88%;min-width:100px;padding:9px 11px;border-radius:13px;background:#164777;border:2px solid #4083c4;color:#f4f9ff;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;font-size:12px;box-shadow:0 2px 8px #06172c66}
 .client-msg .bubble{background:#075451;border-color:#20a39a}.operator-msg .bubble{background:#284c6a;border-color:#6896bb}.copilot-msg .bubble{background:#30476f;border-color:#7c91cf}
@@ -52,13 +58,15 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .light{background:#e5edf5;color:#1f3045}.light .top p{color:#566d86}.light .theme-toggle{background:#fff;color:#24415e;border-color:#9eb8d2}.light .theme-toggle:hover{background:#eaf1f8}
 .light .upload{background:#205c9b;border-color:#2d6bab;color:#fff}.light .upload:hover{background:#174d86}.light .upload.drag{background:#3879bb}
 .light .file-name{color:#61758c}.light .search,.light .sort{background:#fff;color:#20364f;border-color:#b9c9da}.light .search::placeholder{color:#8394a7}
+.light .length-panel{background:#f1f4f7;border-color:#8e9dac}.light .length-help{color:#4b5968}.light .length-match{outline-color:#b26800}.light .length-hit{background:#fff0c7;color:#684006}
+.light .rule-panel{background:#fff;border-color:#8faeca;color:#20384f;box-shadow:0 3px 12px #2c51701f}.light .rule-manage{background:#e8f1fa;border-color:#9ebbd6;color:#2b587e}.light .rule-manage:hover{background:#dbeaf7}.light .rule-chip{background:#eef4fa;border-color:#a5bdd4;color:#2b4d6b}.light .rule-chip:hover{background:#deebf7}.light .rule-chip.active{background:#2365a3;border-color:#15528e;color:#fff}.light .rule-clear{color:#355f86}.light .rule-editor{border-color:#c8d8e7}.light .rule-help{color:#526e88}.light .rule-help code{color:#8a5800}.light .rule-actions button,.light .rule-import{background:#edf4fb;border-color:#a5bfd7;color:#244d72}.light .rule-actions button:hover,.light .rule-import:hover{background:#dcecf9}.light .rule-edit-card{background:#f3f7fb;border-color:#aec6dd}.light .rule-fields label{color:#345673}.light .rule-name,.light .rule-patterns{background:#fff;border-color:#adc3d9;color:#20384f}.light .rule-delete{background:#fff0f1;border-color:#d99da6;color:#9b2e3b}.light .rule-status{color:#536f88}.light .rule-hit{background:#e1ecf7;border-color:#99b8d4;color:#2a567e}
 .light .empty{background:#fff;border-color:#d8e2ec}.light .empty p{color:#64788d}.light .head p{color:#71849a}.light .stats{color:#526b85}
 .light .card{background:#fff;border-color:#809fbe;box-shadow:0 9px 22px #23415e2d}.light .client-card-head{background:#d5e2ef;border-color:#9fb8d1}.light .client-card-head strong{color:#1b3550}.light .client-card-head span{color:#506b86}.light .session-count{background:#c3d7eb;border-color:#83a5c5;color:#284d70}
-.light .dialog-scroll{scrollbar-color:#879fb8 #e3ebf4}.light .session-block+.session-block{border-color:#9db9d4}.light .session-intro{background:#deebf7;border-color:#8daed0;border-left-color:#397bb8;color:#203d59;box-shadow:0 3px 10px #24415e20}.light .session-head span,.light .session-meta{color:#4e6d8a}.light .session-meta b{color:#244d75}
+.light .dialog-scroll{scrollbar-color:#879fb8 #e3ebf4}.light .session-block+.session-block{border-color:#9db9d4}.light .session-intro{background:#e1e3e6;border-color:#737b86;color:#222a35;box-shadow:0 3px 10px #28313d2e}.light .session-head span,.light .session-meta{color:#46515e}.light .session-meta b{color:#2e3743}
 .light .transcript+.transcript{border-color:#aac4dd}.light .fragment-label{color:#4e6f90}.light .bubble{background:#d8eaff;border-color:#75a9dc;color:#173b61;box-shadow:0 2px 6px #2d5c891f}.light .client-msg .bubble{background:#d1f2e9;border-color:#67bcac}.light .operator-msg .bubble{background:#dfeaf5;border-color:#92afcb}.light .copilot-msg .bubble{background:#e3e6fa;border-color:#a6b0da}.light .event .bubble{background:#e2eaf2;border-color:#98b0c6;color:#304f6d}.light .reg-info-msg .bubble{background:#fff0ad;border-color:#d99a12;color:#543c05}.light .message.answer-msg .bubble{background:#ffd9dc;border-color:#d74c59;color:#721d29}
 .light .role{color:#345f87}.light .client-msg .role{color:#236e65}.light .event .role{color:#4c6a87}.light .reg-info-msg .role{color:#765109}.light .answer-msg .role{color:#a42b39}.light .client-card-foot{background:#dce8f3;border-color:#9db8d1}.light .client-card-foot span{background:#c7d9ea;border-color:#87a8c6;color:#2c5073}.light .load-more-wrap p{color:#526f8a}.light .load-more{background:#fff;color:#285e93;border-color:#8badcd}.light .load-more:hover{background:#eaf3fc}.light .error{background:#fff0f1;border-color:#efc7cc;color:#9d3340}
 @media(max-width:1150px){.clients-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:5;width:100%}.search,.sort,#client-search,.phrase-search,.message-scope{flex:1;min-width:145px;width:auto}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
+@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:5;width:100%}.search,.sort,#client-search,.phrase-search,.message-scope{flex:1;min-width:145px;width:auto}.length-panel{margin:0 15px 12px}.length-help{min-width:100%}.rule-panel{margin:0 15px 15px}.rule-list{grid-template-columns:1fr}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
 
 </style>
 </head>
@@ -69,9 +77,25 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
     <div class="file-name" id="file-name">Файл пока не выбран</div>
     <input class="search" id="client-search" type="search" placeholder="Найти по ID клиента" aria-label="Найти клиента" disabled>
     <input class="search phrase-search" id="phrase-search" type="search" placeholder="Найти фразу в диалогах" aria-label="Найти фразу в диалогах" disabled>
-    <select class="sort message-scope" id="message-scope" aria-label="Где искать фразу" disabled><option value="all">Все сообщения</option><option value="bot">Бот и Co-pilot</option><option value="operator">Оператор</option><option value="client">Клиент</option><option value="appeals">Обращения и ответы</option></select>
+    <select class="sort message-scope" id="message-scope" aria-label="Где искать фразу" disabled><option value="all">Все сообщения</option><option value="bot">Бот, Агент и Co-pilot</option><option value="operator">Оператор</option><option value="client">Клиент</option><option value="appeals">Обращения и ответы</option></select>
     <select class="sort" id="client-sort" aria-label="Сортировка клиентов и диалогов" disabled><option value="sessions-desc">Больше сессий сначала</option><option value="sessions-asc">Меньше сессий сначала</option></select>
   </div>
+  <section class="length-panel" aria-label="Поиск по длине сообщения">
+    <strong>Длина сообщения</strong>
+    <select class="sort length-role" id="length-role" aria-label="Роль для поиска по длине" disabled><option value="client">Клиент</option><option value="bot">Бот / MESSAGE_IVR</option><option value="agent">Агент</option><option value="copilot">Co-pilot</option><option value="operator">Оператор</option><option value="reg-info">Сведения по обращению</option><option value="answer">Ответ по обращению</option></select>
+    <input class="search length-query" id="length-query" type="search" placeholder="Например: >500 или 200–500" aria-label="Количество символов или диапазон" aria-describedby="length-help" disabled>
+    <span class="length-help" id="length-help" aria-live="polite">Можно указать &gt;500, &gt;=500, 200–500, &lt;100, =50 или 500+. Соседние реплики одной роли считаются вместе.</span>
+  </section>
+  <section class="rule-panel" aria-label="Готовые и пользовательские фильтры">
+    <div class="rule-panel-head"><strong>Словари и фильтры</strong><button class="rule-manage" id="rules-toggle" type="button" aria-expanded="false">Настроить фильтры</button></div>
+    <div class="rule-chips" id="rule-chips"></div>
+    <div class="rule-editor" id="rule-editor" hidden>
+      <p class="rule-help">Одно правило на строку. Обычный текст ищется как подстрока без учёта регистра и «ё/е»; <code>*</code> означает любое продолжение, <code>re:</code> — регулярное выражение. Строки с <code>#</code> не участвуют в поиске. Несколько выбранных блоков работают по «или», а вместе с поиском фразы — по «и». Свои правила из старого файла можно экспортировать там в JSON и импортировать здесь.</p>
+      <div class="rule-actions"><button id="rule-add" type="button">Добавить свой блок</button><button id="rule-apply" type="button">Применить</button><button id="rule-export" type="button">Экспорт JSON</button><label class="rule-import" for="rule-import-input">Импорт JSON<input id="rule-import-input" type="file" accept=".json,application/json"></label><button id="rule-reset" type="button">Сбросить к исходным</button></div>
+      <div class="rule-list" id="rule-list"></div>
+      <p class="rule-status" id="rule-status"></p>
+    </div>
+  </section>
   <main><div class="content" id="content"><div class="empty"><h2>Загрузите файл с обращениями</h2><p>Выберите XLSX с колонками «Текст обращения», «Дата», «ID клиента», «Каналы» и «ID сессии». В карточке каждого клиента будут показаны все его сессии.</p></div></div></main>
   <script>
 /*! xlsx.js (C) 2013-present SheetJS -- http://sheetjs.com */
@@ -102,7 +126,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   'use strict';
   const required = ['Текст обращения','Дата','ID клиента','Каналы','ID сессии'];
   const PAGE_SIZE = 25;
-  const state = {rows:[], clients:[], duplicates:0, sheet:'', groups:[], loaded:0, grid:null, more:null, progress:null, searchTerm:'', searchScope:'all'};
+  const state = {rows:[], clients:[], duplicates:0, sheet:'', groups:[], loaded:0, grid:null, more:null, progress:null, searchTerm:'', searchScope:'all', lengthFilter:null};
   const $ = id => document.getElementById(id);
   const node = (tag, className, value) => { const el=document.createElement(tag); if(className)el.className=className; if(value!==undefined)el.textContent=String(value); return el; };
   const clean = value => String(value ?? '').replace(/\r\n?/g,'\n').trim();
@@ -121,7 +145,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   const dateLabel = row => row.time===null ? (row.dateRaw || 'Дата не указана') : new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:row.hasTime?'2-digit':undefined,minute:row.hasTime?'2-digit':undefined}).format(row.time);
   const compactDateLabel = row => {if(row.time===null)return row.dateRaw||'Дата не указана';const d=new Date(row.time),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}${row.hasTime?' '+p(d.getHours())+':'+p(d.getMinutes()):''}`;};
   const compareRows = (a,b) => (a.time===null?Infinity:a.time)-(b.time===null?Infinity:b.time)||a.index-b.index;
-  const rolePattern = /^\s*(Бот|Клиент|Co-pilot|Оператор|Reg info|Answer|MESSAGE_IVR|CLIENT|OPERATOR)\s*:\s*(.*)$/i;
+  const rolePattern = /^\s*(Бот|Агент|Клиент|Co-pilot|Оператор|Reg info|Answer|MESSAGE_IVR|CLIENT|OPERATOR)\s*:\s*(.*)$/i;
   function parseMessages(text){
     const messages=[]; let current=null;
     for(const line of text.split('\n')){
@@ -141,7 +165,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(key==='answer') return {kind:'answer-msg',name:'Ответ по обращению'};
     if(key==='co-pilot') return {kind:'copilot-msg',name:'Co-pilot'};
     if(key==='оператор'||key==='operator') return {kind:'operator-msg',name:'Оператор'};
-    if(key==='бот'||key==='message_ivr') return {kind:'bot-msg',name:key==='message_ivr'?'MESSAGE_IVR':'Бот'};
+    if(key==='бот'||key==='агент'||key==='message_ivr') return {kind:'bot-msg',name:key==='message_ivr'?'MESSAGE_IVR':key==='агент'?'Агент':'Бот'};
     return {kind:'event',name:role};
   }
   function showError(message){const content=$('content');content.replaceChildren(node('div','error',message));}
@@ -172,7 +196,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function loadData(result,fileName){
     state.rows=result.data.sort(compareRows);state.duplicates=result.duplicates;state.sheet=result.sheet;
     state.clients=buildClientGroups(state.rows);
-    $('file-name').textContent=fileName+' · лист «'+state.sheet+'»';$('client-search').disabled=false;$('client-search').value='';$('phrase-search').disabled=false;$('phrase-search').value='';$('message-scope').disabled=false;$('message-scope').value='all';$('client-sort').disabled=false;
+    invalidateRuleCache();
+    $('file-name').textContent=fileName+' · лист «'+state.sheet+'»';$('client-search').disabled=false;$('client-search').value='';$('phrase-search').disabled=false;$('phrase-search').value='';$('message-scope').disabled=false;$('message-scope').value='all';$('length-role').disabled=false;$('length-role').value='client';$('length-query').disabled=false;$('length-query').value='';$('length-help').textContent='Можно указать >500, >=500, 200–500, <100, =50 или 500+. Соседние реплики одной роли считаются вместе.';$('client-sort').disabled=false;
     renderConversation();
   }
   function buildClientGroups(rows){
@@ -199,6 +224,219 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(scope==='appeals')return kind==='reg-info-msg'||kind==='answer-msg';
     return false;
   }
+  function lengthRole(role){
+    const key=role.toLocaleLowerCase('ru');
+    if(key==='клиент'||key==='client')return 'client';
+    if(key==='бот'||key==='message_ivr')return 'bot';
+    if(key==='агент')return 'agent';
+    if(key==='co-pilot')return 'copilot';
+    if(key==='оператор'||key==='operator')return 'operator';
+    if(key==='reg info')return 'reg-info';
+    if(key==='answer')return 'answer';
+    return 'other';
+  }
+  function parseLengthQuery(input){
+    const value=input.trim().replace(/[–—−]/g,'-');
+    if(!value)return null;
+    let match=value.match(/^(\d+)\s*(?:-|\.\.)\s*(\d+)$/);
+    if(match){const min=Number(match[1]),max=Number(match[2]);return Number.isSafeInteger(min)&&Number.isSafeInteger(max)&&min<=max?{min,max}:false;}
+    match=value.match(/^(>=|<=|>|<|=)\s*(\d+)$/);
+    if(match){const n=Number(match[2]);if(!Number.isSafeInteger(n))return false;const op=match[1];return op==='>'?n===Number.MAX_SAFE_INTEGER?false:{min:n+1,max:Infinity}:op==='>='?{min:n,max:Infinity}:op==='<'?{min:0,max:n-1}:op==='<='?{min:0,max:n}:{min:n,max:n};}
+    match=value.match(/^(\d+)\s*\+$/);
+    if(match){const n=Number(match[1]);return Number.isSafeInteger(n)?{min:n,max:Infinity}:false;}
+    match=value.match(/^(\d+)$/);
+    if(match){const n=Number(match[1]);return Number.isSafeInteger(n)?{min:n,max:n}:false;}
+    return false;
+  }
+  function messageRuns(row){
+    if(row.lengthRuns)return row.lengthRuns;
+    const messages=getMessages(row),runs=[];
+    for(let i=0;i<messages.length;i++){
+      const role=lengthRole(messages[i].role),length=Array.from(messages[i].body).length;
+      const previous=runs.at(-1);
+      if(previous&&previous.role===role){previous.length+=length;previous.count++;previous.end=i+1;}
+      else runs.push({role,length,count:1,start:i,end:i+1});
+    }
+    return row.lengthRuns=runs;
+  }
+  function runMatchesLength(run,role,filter){return run.role===role&&run.length>=filter.min&&run.length<=filter.max;}
+  function clientMatchesLength(client,role,filter){return client.sessions.some(session=>session.rows.some(row=>messageRuns(row).some(run=>runMatchesLength(run,role,filter))));}
+  const DEFAULT_RULE_BLOCKS = [
+    {id:'info',name:'Запрос информации',enabled:true,patterns:['покаж','выдай','предостав','раскрой','перечисл','назови','прочитай','сообщи','что ты знаешь','какие у тебя есть данные','дай информацию']},
+    {id:'action',name:'Команда что-то сделать',enabled:true,patterns:['сделай','выполни','создай','напиши','отправ','удал','измен','добав','позвони','переведи','оформи','отмени','подтверди','запусти','открой','включи','выключи']},
+    {id:'meta',name:'Мета-инструкции модели',enabled:true,patterns:['отвечай','говори','действуй','веди себя','представь','считай что','с этого момента','теперь ты','твоя задача','ты должен','тебе нужно','следуй','используй']},
+    {id:'override',name:'Смена / отмена инструкций',enabled:true,patterns:['игнорир','забуд','не учитывай','отмени предыдущ','не следуй','предыдущие инструкции','предыдущие правила','вместо этого']},
+    {id:'internal',name:'Внутренние инструкции и данные',enabled:true,patterns:['промпт','системный промпт','system prompt','system message','developer message','инструкц','настройк','ограничен','что тебе сказали','какие у тебя инструкции','покажи свои инструкции','внутренние правила','контекст']},
+    {id:'role',name:'Смена роли',enabled:true,patterns:['представь что ты','ты теперь','сыграй роль','притворись','включи режим','действуй как','стань']},
+    {id:'bypass',name:'Обход ограничений',enabled:true,patterns:['без ограничений','без цензуры','не отказывай','обойди','нарушь','забудь правила','это тест','для эксперимента','в учебных целях','тебе разрешено']},
+    {id:'llm_formal',name:'LLM: формальные конструкции',enabled:true,patterns:[
+      'прошу предоставить подробную информацию','прошу предоставить информацию о','прошу разъяснить','прошу уточнить','прошу пояснить','прошу оказать содействие','прошу помочь разобраться','прошу рассмотреть возможность','в связи с этим прошу','в связи с вышеизложенным','исходя из вышеизложенного','учитывая вышеизложенное','учитывая данную ситуацию','в сложившейся ситуации','буду признателен','буду благодарен','необходимо уточнить следующие моменты','хотелось бы уточнить следующие моменты','меня интересует следующая информация','интересуют следующие вопросы','могли бы вы уточнить','могли бы вы пояснить','могли бы вы предоставить','каков порядок действий','какие действия необходимо предпринять','какие шаги необходимо предпринять','прошу дать развернутый ответ','прошу предоставить развернутый ответ','прошу предоставить пошаговую инструкцию','прошу подробно описать','дополнительно хотел бы уточнить','при этом хотелось бы','в частности меня интересует'
+    ]},
+    {id:'llm_structure',name:'LLM: структурированное обращение',enabled:true,patterns:[
+      're:(во-первых|во вторых|во-вторых).{0,250}(во-вторых|в третьих|в-третьих)',
+      're:(?:у меня|возникло|есть).{0,30}(?:несколько|ряд).{0,20}(?:вопросов|уточнений)',
+      're:(?:следующие|следующим образом).{0,30}(?:вопросы|моменты|пункты)',
+      're:(?:хотел|хотела|хотелось бы).{0,40}уточнить.{0,120}(?:также|дополнительно|отдельно)',
+      're:прошу.{0,40}(?:уточнить|разъяснить|предоставить|пояснить).{0,150}(?:также|в частности|дополнительно)',
+      're:(?:какие|каков|каким образом).{0,80}\\?.{0,200}(?:какие|каков|каким образом).{0,80}\\?',
+      're:(?:буду признателен|буду благодарен).{0,80}(?:ответ|информац|разъяснен)',
+      're:(?:в связи с этим|учитывая.{0,30}|исходя из.{0,30}).{0,100}прошу'
+    ]},
+    {id:'llm_dash',name:'LLM: типографика',enabled:true,patterns:['—','«',';']},
+    {id:'nonexistent_fz',name:'Несуществующий ФЗ',enabled:true,patterns:[
+      '# Шаблон из исходного файла, актуальность правил зависит от даты.',
+      '# Проверяется номер, а не корректность статьи или части.',
+      're:(?:№|n|no|номер)?\\s*(?:679|6[89]\\d|[7-9]\\d{2}|[1-9]\\d{3,})\\s*[-–—]?\\s*ф\\.?\\s*з\\.?',
+      're:ф\\.?\\s*з\\.?\\s*(?:№|n|no|номер)?\\s*[-–—]?\\s*(?:679|6[89]\\d|[7-9]\\d{2}|[1-9]\\d{3,})',
+      're:(?:федеральн(?:ый|ого|ому|ым|ом)?\\s+закон(?:а|у|ом|е)?)\\s*(?:№|n|no|номер)?\\s*(?:679|6[89]\\d|[7-9]\\d{2}|[1-9]\\d{3,})'
+    ]},
+    {id:'custom',name:'Кастомный поиск',enabled:true,patterns:[]}
+  ];
+  const RULE_STORAGE_KEY='clientChatViewerRuleBlocksV1';
+  const cloneRuleBlocks=value=>JSON.parse(JSON.stringify(value));
+  function sanitizeRuleBlocks(value){
+    if(!Array.isArray(value)||value.length>60)throw Error('Ожидался массив не более чем из 60 блоков.');
+    const ids=new Set();
+    return value.map((block,index)=>{
+      if(!block||typeof block!=='object'||!Array.isArray(block.patterns)||block.patterns.length>500)throw Error('Неверный формат блока '+(index+1)+'.');
+      const id=String(block.id||'import_'+index),name=String(block.name||'Блок '+(index+1));
+      if(id.length>80||name.length>100||block.patterns.some(pattern=>String(pattern).length>1000))throw Error('Слишком длинное поле в блоке '+(index+1)+'.');
+      if(ids.has(id))throw Error('Повторяется ID блока: '+id);ids.add(id);
+      return {id,name,enabled:block.enabled!==false,patterns:block.patterns.map(String)};
+    });
+  }
+  function loadRuleBlocks(){
+    try{
+      const saved=localStorage.getItem(RULE_STORAGE_KEY);if(saved)return sanitizeRuleBlocks(JSON.parse(saved));
+      const legacy=localStorage.getItem('ivrPromptScannerBlocks');
+      if(legacy){const imported=sanitizeRuleBlocks(JSON.parse(legacy));localStorage.setItem(RULE_STORAGE_KEY,JSON.stringify(imported));return imported;}
+    }catch(error){}
+    return cloneRuleBlocks(DEFAULT_RULE_BLOCKS);
+  }
+  state.ruleBlocks=loadRuleBlocks();state.selectedRuleIds=new Set();state.compiledRuleBlocks=null;state.ruleHitCache=new Map();state.ruleChipKey='';state.ruleChipCounts=new Map();state.ruleChipReady=false;state.ruleChipToken=0;state.ruleVersion=0;
+  function setRuleStatus(message){$('rule-status').textContent=message;}
+  function saveRuleBlocks(){
+    try{localStorage.setItem(RULE_STORAGE_KEY,JSON.stringify(state.ruleBlocks));setRuleStatus('Настройки сохранены локально в браузере.');}
+    catch(error){setRuleStatus('Изменения применены на этой странице. Для сохранения экспортируйте JSON.');}
+  }
+  function invalidateRuleCache(){state.compiledRuleBlocks=null;state.ruleHitCache.clear();state.ruleChipKey='';state.ruleChipToken++;state.ruleVersion++;}
+  function normalizeRuleText(value){return String(value??'').normalize('NFKC').toLocaleLowerCase('ru').replaceAll('ё','е').replace(/\s+/g,' ').trim();}
+  function escapeRuleRegex(value){return value.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+  function compileRulePattern(raw){
+    const src=String(raw??'').trim();if(!src||src.startsWith('#'))return null;
+    if(src.toLowerCase().startsWith('re:')){
+      const body=src.slice(3).trim();if(!body)return null;
+      try{return {raw:src,type:'regex',regex:new RegExp(body,'iu')};}catch(error){return {raw:src,type:'invalid'};}
+    }
+    const normalized=normalizeRuleText(src);
+    if(normalized.includes('*')){
+      try{return {raw:src,type:'wildcard',regex:new RegExp(normalized.split('*').map(escapeRuleRegex).join('.*?'),'iu')};}catch(error){return {raw:src,type:'invalid'};}
+    }
+    return {raw:src,type:'contains',needle:normalized};
+  }
+  function compiledRuleBlocks(){
+    if(state.compiledRuleBlocks)return state.compiledRuleBlocks;
+    state.compiledRuleBlocks=state.ruleBlocks.filter(block=>block.enabled).map(block=>({id:block.id,name:block.name,patterns:block.patterns.map(compileRulePattern).filter(pattern=>pattern&&pattern.type!=='invalid')}));
+    return state.compiledRuleBlocks;
+  }
+  function rulePatternHit(text,normalized,pattern){
+    if(pattern.type==='contains'){
+      if(!normalized.includes(pattern.needle))return null;
+      const rawNeedle=pattern.raw.toLocaleLowerCase('ru'),at=text.toLocaleLowerCase('ru').indexOf(rawNeedle);
+      return {matched:at>=0?text.slice(at,at+pattern.raw.length):'',pattern:pattern.raw};
+    }
+    const match=pattern.regex.exec(pattern.type==='wildcard'?normalized:text);
+    if(!match)return null;
+    return {matched:pattern.type==='wildcard'?text.slice(match.index,match.index+match[0].length):match[0],pattern:pattern.raw};
+  }
+  function messageRuleHits(message,scope){
+    if(!roleInScope(message.role,scope))return [];
+    const text=message.body||'',normalized=normalizeRuleText(text),hits=[];
+    for(const block of compiledRuleBlocks()){
+      for(const pattern of block.patterns){
+        const match=rulePatternHit(text,normalized,pattern);
+        if(match){hits.push({blockId:block.id,blockName:block.name,...match});break;}
+      }
+    }
+    return hits;
+  }
+  function ruleHitsForClient(client,scope){
+    const key=scope+'\u0000'+client.id;
+    if(state.ruleHitCache.has(key))return state.ruleHitCache.get(key);
+    const ids=new Set(),total=compiledRuleBlocks().length;
+    outer:for(const session of client.sessions)for(const row of session.rows)for(const message of getMessages(row)){
+      for(const hit of messageRuleHits(message,scope))ids.add(hit.blockId);
+      if(ids.size>=total)break outer;
+    }
+    state.ruleHitCache.set(key,ids);return ids;
+  }
+  function clientMatchesSelectedRules(client,scope){
+    const ids=ruleHitsForClient(client,scope);
+    return [...state.selectedRuleIds].some(id=>ids.has(id));
+  }
+  function renderRuleChips(base){
+    const scope=$('message-scope').value,key=state.ruleVersion+'|'+scope+'|'+$('client-search').value.toLocaleLowerCase('ru').trim();
+    if(state.ruleChipKey!==key){
+      state.ruleChipCounts=new Map(state.ruleBlocks.map(block=>[block.id,0]));state.ruleChipKey=key;state.ruleChipReady=!base.length;
+      const token=++state.ruleChipToken;let index=0;
+      if(base.length){
+        const step=()=>{
+          if(token!==state.ruleChipToken)return;
+          const started=Date.now();let processed=0;
+          do{
+            for(const id of ruleHitsForClient(base[index],scope))state.ruleChipCounts.set(id,(state.ruleChipCounts.get(id)||0)+1);
+            index++;processed++;
+          }while(index<base.length&&processed<20&&Date.now()-started<12);
+          if(index<base.length)setTimeout(step,0);
+          else{state.ruleChipReady=true;paintRuleChips();}
+        };
+        setTimeout(step,0);
+      }
+    }
+    paintRuleChips();
+  }
+  function paintRuleChips(){
+    const root=$('rule-chips');root.replaceChildren();
+    const ordered=state.ruleBlocks.filter(block=>block.enabled).map((block,index)=>({block,index})).sort((a,b)=>(state.ruleChipCounts.get(b.block.id)||0)-(state.ruleChipCounts.get(a.block.id)||0)||a.index-b.index);
+    for(const {block} of ordered){
+      const active=state.selectedRuleIds.has(block.id),button=node('button','rule-chip'+(active?' active':''));button.type='button';button.disabled=!state.clients.length;button.setAttribute('aria-pressed',String(active));button.append(node('span','',block.name),node('span','rule-chip-count',state.ruleChipReady?(state.ruleChipCounts.get(block.id)||0):'…'));
+      button.addEventListener('click',()=>{if(state.selectedRuleIds.has(block.id))state.selectedRuleIds.delete(block.id);else state.selectedRuleIds.add(block.id);renderConversation();});root.append(button);
+    }
+    if(state.selectedRuleIds.size){const clear=node('button','rule-clear','Сбросить выбор');clear.type='button';clear.addEventListener('click',()=>{state.selectedRuleIds.clear();renderConversation();});root.append(clear);}
+  }
+  function renderRuleEditor(){
+    const root=$('rule-list');root.replaceChildren();
+    state.ruleBlocks.forEach((block,index)=>{
+      const details=node('details','rule-edit-card'),summary=node('summary','',block.name+' · '+block.patterns.filter(pattern=>pattern.trim()&&!pattern.trim().startsWith('#')).length+' правил');details.append(summary);
+      const fields=node('div','rule-fields'),enabledLabel=node('label'),enabled=node('input');enabled.type='checkbox';enabled.className='rule-enabled';enabled.checked=block.enabled;enabled.addEventListener('change',()=>{block.enabled=enabled.checked;});enabledLabel.append(enabled,document.createTextNode('Включён'));fields.append(enabledLabel);
+      const nameLabel=node('label','', 'Название блока'),name=node('input','rule-name');name.value=block.name;name.addEventListener('input',()=>{block.name=name.value;summary.textContent=name.value+' · '+block.patterns.length+' правил';});nameLabel.append(name);fields.append(nameLabel);
+      const patternLabel=node('label','','Правила'),textarea=node('textarea','rule-patterns');textarea.value=block.patterns.join('\n');textarea.spellcheck=false;textarea.addEventListener('input',()=>{block.patterns=textarea.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean);summary.textContent=(block.name||'Блок '+(index+1))+' · '+block.patterns.filter(line=>!line.startsWith('#')).length+' правил';});patternLabel.append(textarea);fields.append(patternLabel);
+      const remove=node('button','rule-delete','Удалить блок');remove.type='button';remove.addEventListener('click',()=>{state.ruleBlocks.splice(index,1);state.selectedRuleIds.delete(block.id);applyRuleChanges();});fields.append(remove);
+      details.append(fields);if(block.id==='custom'||block.id.startsWith('custom_'))details.open=true;root.append(details);
+    });
+  }
+  function applyRuleChanges(){
+    try{state.ruleBlocks=sanitizeRuleBlocks(state.ruleBlocks);}catch(error){setRuleStatus('Не удалось применить фильтры: '+error.message);return;}
+    const activeIds=new Set(state.ruleBlocks.filter(block=>block.enabled).map(block=>block.id));
+    state.selectedRuleIds=new Set([...state.selectedRuleIds].filter(id=>activeIds.has(id)));
+    invalidateRuleCache();saveRuleBlocks();renderRuleEditor();
+    const invalid=state.ruleBlocks.flatMap(block=>block.patterns).map(compileRulePattern).filter(pattern=>pattern?.type==='invalid').length;
+    if(invalid)setRuleStatus(`${invalid} ${invalid===1?'правило с ошибкой':'правил с ошибкой'} в re: — они пропущены.`);
+    if(state.clients.length)renderConversation();else renderRuleChips([]);
+  }
+  function exportRuleBlocks(){
+    const blob=new Blob([JSON.stringify(state.ruleBlocks,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');link.href=url;link.download='client_chat_filters.json';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function initializeRulesUI(){
+    $('rules-toggle').addEventListener('click',()=>{const editor=$('rule-editor'),open=editor.hidden;editor.hidden=!open;$('rules-toggle').setAttribute('aria-expanded',String(open));$('rules-toggle').textContent=open?'Скрыть настройки':'Настроить фильтры';if(open)renderRuleEditor();});
+    $('rule-add').addEventListener('click',()=>{if(state.ruleBlocks.length>=60){setRuleStatus('Достигнут предел: 60 блоков.');return;}state.ruleBlocks.push({id:'custom_'+Date.now()+'_'+state.ruleBlocks.length,name:'Новый блок',enabled:true,patterns:[]});renderRuleEditor();});
+    $('rule-apply').addEventListener('click',applyRuleChanges);
+    $('rule-export').addEventListener('click',exportRuleBlocks);
+    $('rule-import-input').addEventListener('change',async event=>{const file=event.target.files?.[0];if(!file)return;try{state.ruleBlocks=sanitizeRuleBlocks(JSON.parse(await file.text()));state.selectedRuleIds.clear();applyRuleChanges();}catch(error){setRuleStatus('Не удалось импортировать JSON: '+error.message);}event.target.value='';});
+    $('rule-reset').addEventListener('click',()=>{if(!confirm('Вернуть исходные фильтры? Пользовательские изменения будут удалены.'))return;state.ruleBlocks=cloneRuleBlocks(DEFAULT_RULE_BLOCKS);state.selectedRuleIds.clear();applyRuleChanges();});
+    renderRuleChips([]);
+  }
+
   function clientMatchesPhrase(client,term,scope){
     const needle=term.toLocaleLowerCase('ru');
     return client.sessions.some(session=>session.rows.some(row=>getMessages(row).some(message=>roleInScope(message.role,scope)&&message.body.toLocaleLowerCase('ru').includes(needle))));
@@ -217,13 +455,21 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     const content=$('content');content.replaceChildren();if(!state.clients.length)return;
     const idQuery=$('client-search').value.toLocaleLowerCase('ru').trim(),base=orderedClients().filter(client=>!idQuery||client.id.toLocaleLowerCase('ru').includes(idQuery));
     state.searchTerm=$('phrase-search').value.trim();state.searchScope=$('message-scope').value;
-    const groups=state.searchTerm?base.filter(client=>clientMatchesPhrase(client,state.searchTerm,state.searchScope)):base;
+    const lengthInput=$('length-query').value.trim(),lengthFilter=parseLengthQuery(lengthInput),lengthRoleValue=$('length-role').value;
+    state.lengthFilter=lengthFilter&&lengthFilter!==false?{...lengthFilter,role:lengthRoleValue}:null;
+    $('length-query').setAttribute('aria-invalid',String(lengthFilter===false));
+    $('length-help').textContent=lengthFilter===false?'Укажите число или диапазон: >500, >=500, 200–500, <100, =50, 500+.':'Можно указать >500, >=500, 200–500, <100, =50 или 500+. Соседние реплики одной роли считаются вместе.';
+    renderRuleChips(base);
+    const phraseMatches=state.searchTerm?base.filter(client=>clientMatchesPhrase(client,state.searchTerm,state.searchScope)):base;
+    const ruleMatches=state.selectedRuleIds.size?phraseMatches.filter(client=>clientMatchesSelectedRules(client,state.searchScope)):phraseMatches;
+    const groups=lengthFilter===false?[]:state.lengthFilter?ruleMatches.filter(client=>clientMatchesLength(client,lengthRoleValue,state.lengthFilter)):ruleMatches;
     const sessionTotal=groups.reduce((sum,client)=>sum+client.sessionCount,0);
     const head=node('div','head');const left=node('div');left.append(node('h2','','Диалоги клиентов'),node('p','','Все сессии каждого клиента собраны в одной карточке'));
     const fraction=base.length?new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(groups.length/base.length*100):'0';
-    const summary=state.searchTerm?`Совпало: ${groups.length} из ${base.length} клиентов (${fraction}%) · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}`:`${groups.length} ${plural(groups.length,'клиент','клиента','клиентов')} · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}${state.duplicates?' · удалено дублей: '+state.duplicates:''}`;
+    const filtered=Boolean(state.searchTerm||state.selectedRuleIds.size||lengthInput);
+    const summary=filtered?`Совпало: ${groups.length} из ${base.length} клиентов (${fraction}%) · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}`:`${groups.length} ${plural(groups.length,'клиент','клиента','клиентов')} · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}${state.duplicates?' · удалено дублей: '+state.duplicates:''}`;
     head.append(left,node('div','stats',summary));content.append(head);
-    if(!groups.length){state.groups=[];state.loaded=0;state.grid=null;state.more=null;state.progress=null;content.append(node('div','empty',state.searchTerm?'Совпадений по фразе не найдено.':'Клиенты с таким ID не найдены.'));return;}
+    if(!groups.length){state.groups=[];state.loaded=0;state.grid=null;state.more=null;state.progress=null;content.append(node('div','empty',lengthFilter===false?'Исправьте условие длины сообщения.':filtered?'Совпадений по выбранным фильтрам не найдено.':'Клиенты с таким ID не найдены.'));return;}
     state.groups=groups;state.loaded=0;state.grid=node('div','clients-grid');content.append(state.grid);
     const controls=node('div','load-more-wrap');state.progress=node('p');state.more=node('button','load-more');state.more.type='button';state.more.addEventListener('click',showMore);controls.append(state.progress,state.more);content.append(controls);
     showMore();
@@ -246,11 +492,20 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       const channels=[...new Set(group.rows.map(r=>r.channel))],meta=node('div','session-meta');meta.append(node('div','',`Канал: ${channels.join(', ')}`),node('div','',group.id?'ID сессии: '+group.id:'ID сессии не указан'));if(group.rows.length>1)meta.append(node('div','',`${group.rows.length} ${plural(group.rows.length,'фрагмент','фрагмента','фрагментов')}`));intro.append(meta);block.append(intro);
       for(let i=0;i<group.rows.length;i++){
         const row=group.rows[i], transcript=node('div','transcript');if(group.rows.length>1)transcript.append(node('div','fragment-label',`Фрагмент ${i+1} · ${dateLabel(row)}`));
-        for(const message of getMessages(row)){
+        const runs=state.lengthFilter?messageRuns(row):[],messages=getMessages(row);let runIndex=0;
+        for(let messageIndex=0;messageIndex<messages.length;messageIndex++){
+          const message=messages[messageIndex];
           const role=identify(message.role), item=node('div','message '+role.kind);
-          const bubble=node('div','bubble'),body=node('div');
-          if(state.searchTerm&&roleInScope(message.role,state.searchScope))appendHighlighted(body,message.body||' ',state.searchTerm);else body.textContent=message.body||' ';
-          bubble.append(node('div','role',role.name),body);item.append(bubble);transcript.append(item);
+          while(runs[runIndex]&&messageIndex>=runs[runIndex].end)runIndex++;
+          const run=runs[runIndex],lengthHit=run&&runMatchesLength(run,state.lengthFilter.role,state.lengthFilter);
+          const bubble=node('div',lengthHit?'bubble length-match':'bubble'),body=node('div');
+          const ruleHits=state.selectedRuleIds.size?messageRuleHits(message,state.searchScope).filter(hit=>state.selectedRuleIds.has(hit.blockId)):[];
+          const highlight=state.searchTerm&&roleInScope(message.role,state.searchScope)?state.searchTerm:(ruleHits[0]?.matched||'');
+          if(highlight)appendHighlighted(body,message.body||' ',highlight);else body.textContent=message.body||' ';
+          bubble.append(node('div','role',role.name),body);
+          if(lengthHit&&messageIndex===run.start)bubble.append(node('div','length-hit',`${run.length} ${plural(run.length,'символ','символа','символов')}${run.count>1?' · '+run.count+' '+plural(run.count,'реплика','реплики','реплик')+' подряд':''}`));
+          if(ruleHits.length)bubble.append(node('div','rule-hit',`Правило: ${ruleHits.map(hit=>hit.blockName).join(', ')}`));
+          item.append(bubble);transcript.append(item);
         }
         block.append(transcript);
       }
@@ -271,11 +526,14 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   $('client-search').addEventListener('input',renderConversation);
   $('phrase-search').addEventListener('input',renderConversation);
   $('message-scope').addEventListener('change',renderConversation);
+  $('length-role').addEventListener('change',renderConversation);
+  $('length-query').addEventListener('input',renderConversation);
   $('client-sort').addEventListener('change',renderConversation);
   $('theme-toggle').addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');document.body.classList.toggle('light',!dark);$('theme-toggle').textContent=dark?'Светлая тема':'Тёмная тема';$('theme-toggle').setAttribute('aria-pressed',String(dark));});
   const drop=$('drop-zone');for(const event of ['dragenter','dragover'])drop.addEventListener(event,e=>{e.preventDefault();drop.classList.add('drag');});
   for(const event of ['dragleave','drop'])drop.addEventListener(event,e=>{e.preventDefault();drop.classList.remove('drag');});
   drop.addEventListener('drop',e=>handleFile(e.dataTransfer.files[0]));
+  initializeRulesUI();
   </script>
 </body>
 </html>
