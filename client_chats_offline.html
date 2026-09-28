@@ -91,10 +91,10 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
     <span class="length-help" id="length-help" aria-live="polite">Можно указать &gt;500, &gt;=500, 200–500, &lt;100, =50 или 500+. Соседние реплики одной роли считаются вместе.</span>
   </section>
   <section class="rule-panel" aria-label="Готовые и пользовательские фильтры">
-    <div class="rule-panel-head"><strong>Словари и фильтры</strong><button class="rule-manage" id="rules-toggle" type="button" aria-expanded="false">Настроить фильтры</button></div>
+    <div class="rule-panel-head"><strong>Словари и фильтры · только сообщения клиента</strong><button class="rule-manage" id="rules-toggle" type="button" aria-expanded="false">Настроить фильтры</button></div>
     <div class="rule-chips" id="rule-chips"></div>
     <div class="rule-editor" id="rule-editor" hidden>
-      <p class="rule-help">Одно правило на строку. Обычный текст ищется как подстрока без учёта регистра и «ё/е»; <code>*</code> означает любое продолжение, <code>re:</code> — регулярное выражение. Строки с <code>#</code> не участвуют в поиске. Несколько выбранных блоков работают по «или», а вместе с поиском фразы — по «и». Свои правила из старого файла можно экспортировать там в JSON и импортировать здесь.</p>
+      <p class="rule-help">Правила проверяются только в сообщениях клиента. Одно правило на строку. Обычный текст ищется как подстрока без учёта регистра и «ё/е»; <code>*</code> означает любое продолжение, <code>re:</code> — регулярное выражение. Строки с <code>#</code> не участвуют в поиске. Несколько выбранных блоков работают по «или», а вместе с поиском фразы — по «и». Свои правила из старого файла можно экспортировать там в JSON и импортировать здесь.</p>
       <div class="rule-actions"><button id="rule-add" type="button">Добавить свой блок</button><button id="rule-apply" type="button">Применить</button><button id="rule-export" type="button">Экспорт JSON</button><label class="rule-import" for="rule-import-input">Импорт JSON<input id="rule-import-input" type="file" accept=".json,application/json"></label><button id="rule-reset" type="button">Сбросить к исходным</button></div>
       <div class="rule-list" id="rule-list"></div>
       <p class="rule-status" id="rule-status"></p>
@@ -355,8 +355,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(!match)return null;
     return {matched:pattern.type==='wildcard'?text.slice(match.index,match.index+match[0].length):match[0],pattern:pattern.raw};
   }
-  function messageRuleHits(message,scope){
-    if(!roleInScope(message.role,scope))return [];
+  function messageRuleHits(message){
+    if(identify(message.role).kind!=='client-msg')return [];
     const text=message.body||'',normalized=normalizeRuleText(text),hits=[];
     for(const block of compiledRuleBlocks()){
       for(const pattern of block.patterns){
@@ -366,22 +366,22 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     }
     return hits;
   }
-  function ruleHitsForClient(client,scope){
-    const key=scope+'\u0000'+client.id;
+  function ruleHitsForClient(client){
+    const key=client.id;
     if(state.ruleHitCache.has(key))return state.ruleHitCache.get(key);
     const ids=new Set(),total=compiledRuleBlocks().length;
     outer:for(const session of client.sessions)for(const row of session.rows)for(const message of getMessages(row)){
-      for(const hit of messageRuleHits(message,scope))ids.add(hit.blockId);
+      for(const hit of messageRuleHits(message))ids.add(hit.blockId);
       if(ids.size>=total)break outer;
     }
     state.ruleHitCache.set(key,ids);return ids;
   }
-  function clientMatchesSelectedRules(client,scope){
-    const ids=ruleHitsForClient(client,scope);
+  function clientMatchesSelectedRules(client){
+    const ids=ruleHitsForClient(client);
     return [...state.selectedRuleIds].some(id=>ids.has(id));
   }
   function renderRuleChips(base){
-    const scope=$('message-scope').value,key=state.ruleVersion+'|'+scope+'|'+$('client-search').value.toLocaleLowerCase('ru').trim();
+    const key=state.ruleVersion+'|'+$('client-search').value.toLocaleLowerCase('ru').trim();
     if(state.ruleChipKey!==key){
       state.ruleChipCounts=new Map(state.ruleBlocks.map(block=>[block.id,0]));state.ruleChipKey=key;state.ruleChipReady=!base.length;
       const token=++state.ruleChipToken;let index=0;
@@ -390,7 +390,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           if(token!==state.ruleChipToken)return;
           const started=Date.now();let processed=0;
           do{
-            for(const id of ruleHitsForClient(base[index],scope))state.ruleChipCounts.set(id,(state.ruleChipCounts.get(id)||0)+1);
+            for(const id of ruleHitsForClient(base[index]))state.ruleChipCounts.set(id,(state.ruleChipCounts.get(id)||0)+1);
             index++;processed++;
           }while(index<base.length&&processed<20&&Date.now()-started<12);
           if(index<base.length)setTimeout(step,0);
@@ -467,7 +467,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     $('length-help').textContent=lengthFilter===false?'Укажите число или диапазон: >500, >=500, 200–500, <100, =50, 500+.':'Можно указать >500, >=500, 200–500, <100, =50 или 500+. Соседние реплики одной роли считаются вместе.';
     renderRuleChips(base);
     const phraseMatches=state.searchTerm?base.filter(client=>clientMatchesPhrase(client,state.searchTerm,state.searchScope)):base;
-    const ruleMatches=state.selectedRuleIds.size?phraseMatches.filter(client=>clientMatchesSelectedRules(client,state.searchScope)):phraseMatches;
+    const ruleMatches=state.selectedRuleIds.size?phraseMatches.filter(client=>clientMatchesSelectedRules(client)):phraseMatches;
     const groups=lengthFilter===false?[]:state.lengthFilter?ruleMatches.filter(client=>clientMatchesLength(client,lengthRoleValue,state.lengthFilter)):ruleMatches;
     const sessionTotal=groups.reduce((sum,client)=>sum+client.sessionCount,0);
     const head=node('div','head');const left=node('div');left.append(node('h2','','Диалоги клиентов'),node('p','','Все сессии каждого клиента собраны в одной карточке'));
@@ -505,7 +505,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
           while(runs[runIndex]&&messageIndex>=runs[runIndex].end)runIndex++;
           const run=runs[runIndex],lengthHit=run&&runMatchesLength(run,state.lengthFilter.role,state.lengthFilter);
           const bubble=node('div',lengthHit?'bubble length-match':'bubble'),body=node('div');
-          const ruleHits=state.selectedRuleIds.size?messageRuleHits(message,state.searchScope).filter(hit=>state.selectedRuleIds.has(hit.blockId)):[];
+          const ruleHits=state.selectedRuleIds.size?messageRuleHits(message).filter(hit=>state.selectedRuleIds.has(hit.blockId)):[];
           const highlight=state.searchTerm&&roleInScope(message.role,state.searchScope)?state.searchTerm:(ruleHits[0]?.matched||'');
           if(highlight)appendHighlighted(body,message.body||' ',highlight);else body.textContent=message.body||' ';
           bubble.append(node('div','role',role.name),body);
