@@ -6,9 +6,9 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
   <title>Обращения клиентов — локальный просмотр</title>
   <style>
-:root{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#e9f1fb;background:#0a182b}
+:root{font-family:Arial,Helvetica,sans-serif;font-size:13px;color:#e9f1fb;background:#071426}
 *{box-sizing:border-box}
-body{margin:0;background:#0a182b;min-height:100vh}
+body{margin:0;background:#071426;min-height:100vh}
 button,input,select{font:inherit}
 button{cursor:pointer}
 .top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 28px 12px;max-width:1500px;margin:auto}
@@ -19,43 +19,46 @@ button{cursor:pointer}
 .toolbar{max-width:1500px;margin:0 auto;padding:0 28px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .upload{display:inline-flex;align-items:center;justify-content:center;min-height:36px;border:1px solid #4570a5;background:#17406f;border-radius:8px;color:#eff6ff;padding:8px 14px;font-weight:700;white-space:nowrap;cursor:pointer}
 .upload:hover{background:#20538d}.upload.drag{background:#245f9f;border-color:#8fc0ff}.upload input{display:none}
-.file-name{font-size:11px;color:#91a7c0;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
+.file-name{font-size:11px;color:#91a7c0;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
 .search,.sort{height:36px;border:1px solid #40556e;background:#152840;border-radius:8px;color:#e6f0fc;padding:0 11px;outline:none}
-.search{width:220px}.sort{width:198px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
+.search{width:220px}#client-search{width:170px}.phrase-search{width:235px}.sort{width:198px}.message-scope{width:180px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
 main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .empty{margin:8vh auto 0;max-width:560px;text-align:center;background:#152840;border:1px solid #2c4562;border-radius:14px;padding:40px 30px}
 .empty h2{font-size:19px;margin:0 0 10px}.empty p{color:#a8bdd5;line-height:1.6;margin:0;font-size:13px}
 .head{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;flex-wrap:wrap;margin:0 0 12px}.head h2{font-size:15px;margin:0 0 3px}.head p{font-size:11px;color:#8ea4be;margin:0}.stats{font-size:11px;color:#bdd0e5}
-.clients-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-items:start}
-.client-window{min-width:0}.card{height:505px;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:#0e2036;border:1px solid #2b4059;border-radius:13px;box-shadow:0 4px 14px #06112055}
-.client-card-head{min-height:64px;flex:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:#3b4d61;border-bottom:1px solid #536478}
+.clients-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;align-items:start}
+.client-window{min-width:0}.card{height:505px;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:#0e2036;border:2px solid #6888a9;border-radius:13px;box-shadow:0 9px 24px #020a1888}
+.client-card-head{min-height:64px;flex:none;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:#405a75;border-bottom:2px solid #7693af}
 .client-card-head strong{font-size:14px;line-height:1.3;color:#fff;display:block;overflow-wrap:anywhere}.client-card-head span{display:block;font-size:11px;color:#b0bdcc;margin-top:3px}
 .session-count{font-size:11px;color:#d8e5f3;background:#465d76;border:1px solid #617891;border-radius:999px;padding:5px 8px;white-space:nowrap;flex:none}
 .dialog-scroll{min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 15px 18px;scrollbar-color:#99a9ba #e7edf3;scrollbar-width:thin}
 .dialog-scroll:focus{outline:2px solid #81b6ed;outline-offset:-2px}
-.session-block+.session-block{border-top:1px solid #3b526e;margin-top:24px;padding-top:18px}
-.session-intro{background:#2b4158;border:1px solid #506981;border-radius:13px;padding:11px 12px;margin:0 14px 12px;color:#edf5fd;box-shadow:0 3px 12px #07152944}
+.session-block+.session-block{border-top:2px solid #587797;margin-top:24px;padding-top:18px}
+.session-intro{background:#2b4965;border:2px solid #718eaa;border-left:5px solid #91b7dc;border-radius:13px;padding:11px 12px;margin:0 14px 12px;color:#f3f8ff;box-shadow:0 3px 12px #07152955}
 .session-head{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:8px}.session-head strong{font-size:11px}.session-head span{font-size:10px;color:#c1d0e0}
 .session-meta{color:#b5c8dc;font-size:10px;line-height:1.4;overflow-wrap:anywhere}.session-meta b{font-weight:700;color:#e2edf9}
 .transcript+.transcript{border-top:1px dashed #435d7a;margin-top:18px;padding-top:13px}.fragment-label{color:#8fa8c3;font-size:10px;margin:0 0 8px}
-.message{display:flex;margin:10px 0;justify-content:flex-start}.message.client-msg{justify-content:flex-end}.bubble{max-width:88%;min-width:100px;padding:9px 11px;border-radius:13px;background:#133d6e;border:1px solid #285d9b;color:#eef6ff;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;font-size:12px;box-shadow:0 2px 8px #06172c55}
-.client-msg .bubble{background:#074448;border-color:#0f6970}.operator-msg .bubble{background:#21415f;border-color:#3f6a8c}.copilot-msg .bubble{background:#24415e;border-color:#486f98}
-.message.event{justify-content:center}.event .bubble{max-width:94%;background:#263c53;border-color:#51677e;color:#d8e6f5}
-.message.answer-msg .bubble{background:#1b4a5d;border-color:#3c778c}
+.message{display:flex;margin:10px 0;justify-content:flex-start}.message.client-msg{justify-content:flex-end}.bubble{max-width:88%;min-width:100px;padding:9px 11px;border-radius:13px;background:#164777;border:2px solid #4083c4;color:#f4f9ff;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.45;font-size:12px;box-shadow:0 2px 8px #06172c66}
+.client-msg .bubble{background:#075451;border-color:#20a39a}.operator-msg .bubble{background:#284c6a;border-color:#6896bb}.copilot-msg .bubble{background:#30476f;border-color:#7c91cf}
+.message.event{justify-content:center}.event .bubble{max-width:94%;background:#30475f;border-color:#829ab1;color:#e8f1fb}
+.message.reg-info-msg{justify-content:center}.reg-info-msg .bubble{max-width:94%;background:#5b460d;border-color:#e7b936;color:#fff5d2}
+.message.answer-msg .bubble{background:#712631;border-color:#ee6975;color:#fff0f1}
 .role{font-size:10px;line-height:1.2;color:#b8d0ea;margin-bottom:5px;text-transform:uppercase}.client-msg .role{color:#a9dfdf}.event .role{color:#c4d0dc}
-.client-card-foot{height:49px;flex:none;display:flex;align-items:center;justify-content:flex-end;padding:9px 16px;background:#223448;border-top:1px solid #3a5066}.client-card-foot span{font-size:10px;color:#d7e4f2;background:#3a4e64;border:1px solid #51677f;border-radius:999px;padding:6px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reg-info-msg .role{color:#ffe18a}.answer-msg .role{color:#ffc1c6}
+.bubble mark{background:#ffd65b;color:#302400;border-radius:2px;padding:0 1px}
+.client-card-foot{height:49px;flex:none;display:flex;align-items:center;justify-content:flex-end;padding:9px 16px;background:#29425d;border-top:2px solid #6686a6}.client-card-foot span{font-size:10px;color:#edf5ff;background:#415e7b;border:1px solid #86a4c0;border-radius:999px;padding:6px 9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .load-more-wrap{text-align:center;margin:23px 0 0}.load-more-wrap p{font-size:11px;color:#8ea4be;margin:0 0 10px}.load-more{border:1px solid #51759b;border-radius:8px;background:#203b58;color:#e9f3ff;padding:10px 18px;font-weight:700}.load-more:hover{background:#2c5077}.load-more[hidden]{display:none}
 .error{background:#522732;color:#ffe1e3;border:1px solid #a35565;border-radius:9px;padding:11px 13px;margin:0 0 15px;font-size:12px}
-.light{background:#f2f5f9;color:#1f3045}.light .top p{color:#63758c}.light .theme-toggle{background:#fff;color:#24415e;border-color:#bccbdd}.light .theme-toggle:hover{background:#eaf1f8}
+.light{background:#e5edf5;color:#1f3045}.light .top p{color:#566d86}.light .theme-toggle{background:#fff;color:#24415e;border-color:#9eb8d2}.light .theme-toggle:hover{background:#eaf1f8}
 .light .upload{background:#205c9b;border-color:#2d6bab;color:#fff}.light .upload:hover{background:#174d86}.light .upload.drag{background:#3879bb}
 .light .file-name{color:#61758c}.light .search,.light .sort{background:#fff;color:#20364f;border-color:#b9c9da}.light .search::placeholder{color:#8394a7}
 .light .empty{background:#fff;border-color:#d8e2ec}.light .empty p{color:#64788d}.light .head p{color:#71849a}.light .stats{color:#526b85}
-.light .card{background:#fff;border-color:#cddae6;box-shadow:0 3px 14px #23415e16}.light .client-card-head{background:#e7edf3;border-color:#d3dee9}.light .client-card-head strong{color:#21364e}.light .client-card-head span{color:#677c91}.light .session-count{background:#d7e2ee;border-color:#b7c8d9;color:#425e7b}
-.light .dialog-scroll{scrollbar-color:#a5b7c9 #ecf1f6}.light .session-block+.session-block{border-color:#d3e0ec}.light .session-intro{background:#edf2f7;border-color:#ccdae7;color:#2c435a;box-shadow:0 2px 8px #24415e12}.light .session-head span,.light .session-meta{color:#687e94}.light .session-meta b{color:#345373}
-.light .transcript+.transcript{border-color:#ccdbe9}.light .fragment-label{color:#687f98}.light .bubble{background:#e6f0fc;border-color:#b9d4f2;color:#203b5a;box-shadow:none}.light .client-msg .bubble{background:#daf3ef;border-color:#a5dbd1}.light .operator-msg .bubble{background:#e5edf6;border-color:#c4d4e6}.light .copilot-msg .bubble{background:#e8eafa;border-color:#d0d4ec}.light .event .bubble{background:#edf2f7;border-color:#cfdae5;color:#4f6378}.light .message.answer-msg .bubble{background:#e0f0ed;border-color:#bedbd4}
-.light .role{color:#4c7197}.light .client-msg .role{color:#337c74}.light .event .role{color:#688098}.light .client-card-foot{background:#edf2f7;border-color:#d3dee9}.light .client-card-foot span{background:#dfe8f1;border-color:#c5d4e3;color:#49627c}.light .load-more-wrap p{color:#6f8398}.light .load-more{background:#fff;color:#285e93;border-color:#a8c3dd}.light .load-more:hover{background:#eaf3fc}.light .error{background:#fff0f1;border-color:#efc7cc;color:#9d3340}
+.light .card{background:#fff;border-color:#809fbe;box-shadow:0 9px 22px #23415e2d}.light .client-card-head{background:#d5e2ef;border-color:#9fb8d1}.light .client-card-head strong{color:#1b3550}.light .client-card-head span{color:#506b86}.light .session-count{background:#c3d7eb;border-color:#83a5c5;color:#284d70}
+.light .dialog-scroll{scrollbar-color:#879fb8 #e3ebf4}.light .session-block+.session-block{border-color:#9db9d4}.light .session-intro{background:#deebf7;border-color:#8daed0;border-left-color:#397bb8;color:#203d59;box-shadow:0 3px 10px #24415e20}.light .session-head span,.light .session-meta{color:#4e6d8a}.light .session-meta b{color:#244d75}
+.light .transcript+.transcript{border-color:#aac4dd}.light .fragment-label{color:#4e6f90}.light .bubble{background:#d8eaff;border-color:#75a9dc;color:#173b61;box-shadow:0 2px 6px #2d5c891f}.light .client-msg .bubble{background:#d1f2e9;border-color:#67bcac}.light .operator-msg .bubble{background:#dfeaf5;border-color:#92afcb}.light .copilot-msg .bubble{background:#e3e6fa;border-color:#a6b0da}.light .event .bubble{background:#e2eaf2;border-color:#98b0c6;color:#304f6d}.light .reg-info-msg .bubble{background:#fff0ad;border-color:#d99a12;color:#543c05}.light .message.answer-msg .bubble{background:#ffd9dc;border-color:#d74c59;color:#721d29}
+.light .role{color:#345f87}.light .client-msg .role{color:#236e65}.light .event .role{color:#4c6a87}.light .reg-info-msg .role{color:#765109}.light .answer-msg .role{color:#a42b39}.light .client-card-foot{background:#dce8f3;border-color:#9db8d1}.light .client-card-foot span{background:#c7d9ea;border-color:#87a8c6;color:#2c5073}.light .load-more-wrap p{color:#526f8a}.light .load-more{background:#fff;color:#285e93;border-color:#8badcd}.light .load-more:hover{background:#eaf3fc}.light .error{background:#fff0f1;border-color:#efc7cc;color:#9d3340}
 @media(max-width:1150px){.clients-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:4;width:100%}.search,.sort{flex:1;min-width:145px;width:auto}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
+@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:5;width:100%}.search,.sort,#client-search,.phrase-search,.message-scope{flex:1;min-width:145px;width:auto}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
 
 </style>
 </head>
@@ -65,6 +68,8 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
     <label class="upload" id="drop-zone" for="file-input">Загрузить XLSX<input type="file" id="file-input" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></label>
     <div class="file-name" id="file-name">Файл пока не выбран</div>
     <input class="search" id="client-search" type="search" placeholder="Найти по ID клиента" aria-label="Найти клиента" disabled>
+    <input class="search phrase-search" id="phrase-search" type="search" placeholder="Найти фразу в диалогах" aria-label="Найти фразу в диалогах" disabled>
+    <select class="sort message-scope" id="message-scope" aria-label="Где искать фразу" disabled><option value="all">Все сообщения</option><option value="bot">Бот и Co-pilot</option><option value="operator">Оператор</option><option value="client">Клиент</option><option value="appeals">Обращения и ответы</option></select>
     <select class="sort" id="client-sort" aria-label="Сортировка клиентов и диалогов" disabled><option value="sessions-desc">Больше сессий сначала</option><option value="sessions-asc">Меньше сессий сначала</option></select>
   </div>
   <main><div class="content" id="content"><div class="empty"><h2>Загрузите файл с обращениями</h2><p>Выберите XLSX с колонками «Текст обращения», «Дата», «ID клиента», «Каналы» и «ID сессии». В карточке каждого клиента будут показаны все его сессии.</p></div></div></main>
@@ -97,7 +102,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   'use strict';
   const required = ['Текст обращения','Дата','ID клиента','Каналы','ID сессии'];
   const PAGE_SIZE = 25;
-  const state = {rows:[], clients:[], duplicates:0, sheet:'', groups:[], loaded:0, grid:null, more:null, progress:null};
+  const state = {rows:[], clients:[], duplicates:0, sheet:'', groups:[], loaded:0, grid:null, more:null, progress:null, searchTerm:'', searchScope:'all'};
   const $ = id => document.getElementById(id);
   const node = (tag, className, value) => { const el=document.createElement(tag); if(className)el.className=className; if(value!==undefined)el.textContent=String(value); return el; };
   const clean = value => String(value ?? '').replace(/\r\n?/g,'\n').trim();
@@ -128,10 +133,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(current) messages.push(current);
     return messages.length?messages:[{role:'Запись',body:text||'(пустой текст обращения)'}];
   }
+  function getMessages(row){return row.messages||(row.messages=parseMessages(row.text));}
   function identify(role){
     const key=role.toLocaleLowerCase('ru');
     if(key==='клиент'||key==='client') return {kind:'client-msg',name:'Клиент'};
-    if(key==='reg info') return {kind:'event',name:'Сведения по обращению'};
+    if(key==='reg info') return {kind:'reg-info-msg',name:'Сведения по обращению'};
     if(key==='answer') return {kind:'answer-msg',name:'Ответ по обращению'};
     if(key==='co-pilot') return {kind:'copilot-msg',name:'Co-pilot'};
     if(key==='оператор'||key==='operator') return {kind:'operator-msg',name:'Оператор'};
@@ -166,7 +172,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   function loadData(result,fileName){
     state.rows=result.data.sort(compareRows);state.duplicates=result.duplicates;state.sheet=result.sheet;
     state.clients=buildClientGroups(state.rows);
-    $('file-name').textContent=fileName+' · лист «'+state.sheet+'»';$('client-search').disabled=false;$('client-search').value='';$('client-sort').disabled=false;
+    $('file-name').textContent=fileName+' · лист «'+state.sheet+'»';$('client-search').disabled=false;$('client-search').value='';$('phrase-search').disabled=false;$('phrase-search').value='';$('message-scope').disabled=false;$('message-scope').value='all';$('client-sort').disabled=false;
     renderConversation();
   }
   function buildClientGroups(rows){
@@ -184,16 +190,40 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     const direction=$('client-sort').value==='sessions-asc'?1:-1;
     return [...state.clients].sort((a,b)=>direction*(a.sessionCount-b.sessionCount)||a.id.localeCompare(b.id,'ru',{numeric:true}));
   }
-  function matchingClients(){
-    const q=$('client-search').value.toLocaleLowerCase('ru').trim();
-    return orderedClients().filter(client=>!q||client.id.toLocaleLowerCase('ru').includes(q));
+  function roleInScope(role,scope){
+    if(scope==='all')return true;
+    const kind=identify(role).kind;
+    if(scope==='bot')return kind==='bot-msg'||kind==='copilot-msg';
+    if(scope==='operator')return kind==='operator-msg';
+    if(scope==='client')return kind==='client-msg';
+    if(scope==='appeals')return kind==='reg-info-msg'||kind==='answer-msg';
+    return false;
+  }
+  function clientMatchesPhrase(client,term,scope){
+    const needle=term.toLocaleLowerCase('ru');
+    return client.sessions.some(session=>session.rows.some(row=>getMessages(row).some(message=>roleInScope(message.role,scope)&&message.body.toLocaleLowerCase('ru').includes(needle))));
+  }
+  function appendHighlighted(target,value,term){
+    if(!term){target.textContent=value;return;}
+    const lower=value.toLocaleLowerCase('ru'),needle=term.toLocaleLowerCase('ru');let from=0;
+    while(from<value.length){
+      const at=lower.indexOf(needle,from);
+      if(at<0){target.append(document.createTextNode(value.slice(from)));break;}
+      if(at>from)target.append(document.createTextNode(value.slice(from,at)));
+      target.append(node('mark','',value.slice(at,at+term.length)));from=at+term.length;
+    }
   }
   function renderConversation(){
     const content=$('content');content.replaceChildren();if(!state.clients.length)return;
-    const groups=matchingClients();
+    const idQuery=$('client-search').value.toLocaleLowerCase('ru').trim(),base=orderedClients().filter(client=>!idQuery||client.id.toLocaleLowerCase('ru').includes(idQuery));
+    state.searchTerm=$('phrase-search').value.trim();state.searchScope=$('message-scope').value;
+    const groups=state.searchTerm?base.filter(client=>clientMatchesPhrase(client,state.searchTerm,state.searchScope)):base;
     const sessionTotal=groups.reduce((sum,client)=>sum+client.sessionCount,0);
-    const head=node('div','head');const left=node('div');left.append(node('h2','','Диалоги клиентов'),node('p','','Все сессии каждого клиента собраны в одной карточке'));head.append(left,node('div','stats',`${groups.length} ${plural(groups.length,'клиент','клиента','клиентов')} · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}${state.duplicates?' · удалено дублей: '+state.duplicates:''}`));content.append(head);
-    if(!groups.length){content.append(node('div','empty','Клиенты с таким ID не найдены.'));return;}
+    const head=node('div','head');const left=node('div');left.append(node('h2','','Диалоги клиентов'),node('p','','Все сессии каждого клиента собраны в одной карточке'));
+    const fraction=base.length?new Intl.NumberFormat('ru-RU',{maximumFractionDigits:1}).format(groups.length/base.length*100):'0';
+    const summary=state.searchTerm?`Совпало: ${groups.length} из ${base.length} клиентов (${fraction}%) · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}`:`${groups.length} ${plural(groups.length,'клиент','клиента','клиентов')} · ${sessionTotal} ${plural(sessionTotal,'сессия','сессии','сессий')}${state.duplicates?' · удалено дублей: '+state.duplicates:''}`;
+    head.append(left,node('div','stats',summary));content.append(head);
+    if(!groups.length){state.groups=[];state.loaded=0;state.grid=null;state.more=null;state.progress=null;content.append(node('div','empty',state.searchTerm?'Совпадений по фразе не найдено.':'Клиенты с таким ID не найдены.'));return;}
     state.groups=groups;state.loaded=0;state.grid=node('div','clients-grid');content.append(state.grid);
     const controls=node('div','load-more-wrap');state.progress=node('p');state.more=node('button','load-more');state.more.type='button';state.more.addEventListener('click',showMore);controls.append(state.progress,state.more);content.append(controls);
     showMore();
@@ -216,9 +246,11 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
       const channels=[...new Set(group.rows.map(r=>r.channel))],meta=node('div','session-meta');meta.append(node('div','',`Канал: ${channels.join(', ')}`),node('div','',group.id?'ID сессии: '+group.id:'ID сессии не указан'));if(group.rows.length>1)meta.append(node('div','',`${group.rows.length} ${plural(group.rows.length,'фрагмент','фрагмента','фрагментов')}`));intro.append(meta);block.append(intro);
       for(let i=0;i<group.rows.length;i++){
         const row=group.rows[i], transcript=node('div','transcript');if(group.rows.length>1)transcript.append(node('div','fragment-label',`Фрагмент ${i+1} · ${dateLabel(row)}`));
-        for(const message of parseMessages(row.text)){
+        for(const message of getMessages(row)){
           const role=identify(message.role), item=node('div','message '+role.kind);
-          const bubble=node('div','bubble');bubble.append(node('div','role',role.name),node('div','',message.body||' '));item.append(bubble);transcript.append(item);
+          const bubble=node('div','bubble'),body=node('div');
+          if(state.searchTerm&&roleInScope(message.role,state.searchScope))appendHighlighted(body,message.body||' ',state.searchTerm);else body.textContent=message.body||' ';
+          bubble.append(node('div','role',role.name),body);item.append(bubble);transcript.append(item);
         }
         block.append(transcript);
       }
@@ -237,6 +269,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   }
   $('file-input').addEventListener('change',e=>handleFile(e.target.files[0]));
   $('client-search').addEventListener('input',renderConversation);
+  $('phrase-search').addEventListener('input',renderConversation);
+  $('message-scope').addEventListener('change',renderConversation);
   $('client-sort').addEventListener('change',renderConversation);
   $('theme-toggle').addEventListener('click',()=>{const dark=document.body.classList.toggle('dark');document.body.classList.toggle('light',!dark);$('theme-toggle').textContent=dark?'Светлая тема':'Тёмная тема';$('theme-toggle').setAttribute('aria-pressed',String(dark));});
   const drop=$('drop-zone');for(const event of ['dragenter','dragover'])drop.addEventListener(event,e=>{e.preventDefault();drop.classList.add('drag');});
