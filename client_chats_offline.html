@@ -21,8 +21,8 @@ button{cursor:pointer}
 .upload:hover{background:#20538d}.upload.drag{background:#245f9f;border-color:#8fc0ff}.upload input{display:none}
 .file-name{font-size:11px;color:#91a7c0;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:auto}
 .search,.sort{height:36px;border:1px solid #40556e;background:#152840;border-radius:8px;color:#e6f0fc;padding:0 11px;outline:none}
-.search{width:220px}#client-search{width:170px}.phrase-search{width:235px}.sort{width:198px}.message-scope{width:200px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
-.length-panel{max-width:1444px;margin:0 auto 12px;padding:10px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#1d3148;border:2px solid #6c829a;border-radius:10px}.length-panel strong{font-size:12px;white-space:nowrap;margin-right:5px}.length-role{width:215px}.length-query{width:220px}.length-help{color:#c9d7e6;font-size:11px;line-height:1.4;flex:1;min-width:250px}.length-query[aria-invalid="true"]{border-color:#ef7777;box-shadow:0 0 0 2px #ef777744}.length-match{outline:3px solid #f2b545;outline-offset:2px}.length-hit{display:inline-block;margin-top:8px;padding:3px 7px;border-radius:5px;background:#725017;color:#fff1c9;font-size:10px;font-weight:700}
+.search{width:220px}#client-search{width:170px}.phrase-search{width:235px}.sort{width:198px}.message-scope{width:260px}.search::placeholder{color:#8da2bb}.search:focus,.sort:focus{border-color:#7bb6fa;box-shadow:0 0 0 2px #2b6cad55}.search:disabled,.sort:disabled{opacity:.55}
+.text-panel,.length-panel{max-width:1444px;margin:0 auto 12px;padding:10px 14px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#1d3148;border:2px solid #6c829a;border-radius:10px}.text-panel strong,.length-panel strong{font-size:12px;white-space:nowrap;margin-right:5px}.length-role{width:215px}.length-query{width:220px}.text-help,.length-help{color:#c9d7e6;font-size:11px;line-height:1.4;flex:1;min-width:250px}.length-query[aria-invalid="true"]{border-color:#ef7777;box-shadow:0 0 0 2px #ef777744}.length-match{outline:3px solid #f2b545;outline-offset:2px}.length-hit{display:inline-block;margin-top:8px;padding:3px 7px;border-radius:5px;background:#725017;color:#fff1c9;font-size:10px;font-weight:700}
 .rule-panel{max-width:1444px;margin:0 auto 15px;padding:11px 14px;background:#132941;border:2px solid #5e7d9e;border-radius:11px;color:#e8f2fe}
 .rule-panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.rule-panel-head strong{font-size:12px}.rule-manage{border:1px solid #7897b7;background:#294663;color:#f0f6ff;border-radius:7px;padding:6px 9px;font-size:11px}.rule-manage:hover{background:#365879}
 .rule-chips{display:flex;flex-wrap:wrap;gap:6px}.rule-chip{border:1px solid #6785a5;background:#213b57;color:#dbe9f8;border-radius:999px;padding:6px 9px;font-size:11px;line-height:1.25}.rule-chip:hover{background:#305578}.rule-chip.active{background:#2b66a0;border-color:#9bcaff;color:#fff}.rule-chip:disabled{opacity:.45;cursor:not-allowed}.rule-chip-count{margin-left:6px;opacity:.8;font-variant-numeric:tabular-nums}.rule-clear{border:0;background:transparent;color:#bcd5ee;font-size:11px;padding:6px 8px}
@@ -58,7 +58,7 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .light{background:#e5edf5;color:#1f3045}.light .top p{color:#566d86}.light .theme-toggle{background:#fff;color:#24415e;border-color:#9eb8d2}.light .theme-toggle:hover{background:#eaf1f8}
 .light .upload{background:#205c9b;border-color:#2d6bab;color:#fff}.light .upload:hover{background:#174d86}.light .upload.drag{background:#3879bb}
 .light .file-name{color:#61758c}.light .search,.light .sort{background:#fff;color:#20364f;border-color:#b9c9da}.light .search::placeholder{color:#8394a7}
-.light .length-panel{background:#f1f4f7;border-color:#8e9dac}.light .length-help{color:#4b5968}.light .length-match{outline-color:#b26800}.light .length-hit{background:#fff0c7;color:#684006}
+.light .text-panel,.light .length-panel{background:#f1f4f7;border-color:#8e9dac}.light .text-help,.light .length-help{color:#4b5968}.light .length-match{outline-color:#b26800}.light .length-hit{background:#fff0c7;color:#684006}
 .light .rule-panel{background:#fff;border-color:#8faeca;color:#20384f;box-shadow:0 3px 12px #2c51701f}.light .rule-manage{background:#e8f1fa;border-color:#9ebbd6;color:#2b587e}.light .rule-manage:hover{background:#dbeaf7}.light .rule-chip{background:#eef4fa;border-color:#a5bdd4;color:#2b4d6b}.light .rule-chip:hover{background:#deebf7}.light .rule-chip.active{background:#2365a3;border-color:#15528e;color:#fff}.light .rule-clear{color:#355f86}.light .rule-editor{border-color:#c8d8e7}.light .rule-help{color:#526e88}.light .rule-help code{color:#8a5800}.light .rule-actions button,.light .rule-import{background:#edf4fb;border-color:#a5bfd7;color:#244d72}.light .rule-actions button:hover,.light .rule-import:hover{background:#dcecf9}.light .rule-edit-card{background:#f3f7fb;border-color:#aec6dd}.light .rule-fields label{color:#345673}.light .rule-name,.light .rule-patterns{background:#fff;border-color:#adc3d9;color:#20384f}.light .rule-delete{background:#fff0f1;border-color:#d99da6;color:#9b2e3b}.light .rule-status{color:#536f88}.light .rule-hit{background:#e1ecf7;border-color:#99b8d4;color:#2a567e}
 .light .empty{background:#fff;border-color:#d8e2ec}.light .empty p{color:#64788d}.light .head p{color:#71849a}.light .stats{color:#526b85}
 .light .card{background:#fff;border-color:#809fbe;box-shadow:0 9px 22px #23415e2d}.light .client-card-head{background:#d5e2ef;border-color:#9fb8d1}.light .client-card-head strong{color:#1b3550}.light .client-card-head span{color:#506b86}.light .session-count{background:#c3d7eb;border-color:#83a5c5;color:#284d70}
@@ -66,7 +66,7 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
 .light .transcript+.transcript{border-color:#aac4dd}.light .fragment-label{color:#4e6f90}.light .bubble{background:#d8eaff;border-color:#75a9dc;color:#173b61;box-shadow:0 2px 6px #2d5c891f}.light .client-msg .bubble{background:#d1f2e9;border-color:#67bcac}.light .operator-msg .bubble{background:#dfeaf5;border-color:#92afcb}.light .copilot-msg .bubble{background:#e3e6fa;border-color:#a6b0da}.light .event .bubble{background:#e2eaf2;border-color:#98b0c6;color:#304f6d}.light .reg-info-msg .bubble{background:#fff0ad;border-color:#d99a12;color:#543c05}.light .message.answer-msg .bubble{background:#ffd9dc;border-color:#d74c59;color:#721d29}
 .light .role{color:#345f87}.light .client-msg .role{color:#236e65}.light .event .role{color:#4c6a87}.light .reg-info-msg .role{color:#765109}.light .answer-msg .role{color:#a42b39}.light .client-card-foot{background:#dce8f3;border-color:#9db8d1}.light .client-card-foot span{background:#c7d9ea;border-color:#87a8c6;color:#2c5073}.light .load-more-wrap p{color:#526f8a}.light .load-more{background:#fff;color:#285e93;border-color:#8badcd}.light .load-more:hover{background:#eaf3fc}.light .error{background:#fff0f1;border-color:#efc7cc;color:#9d3340}
 @media(max-width:1150px){.clients-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:5;width:100%}.search,.sort,#client-search,.phrase-search,.message-scope{flex:1;min-width:145px;width:auto}.length-panel{margin:0 15px 12px}.length-help{min-width:100%}.rule-panel{margin:0 15px 15px}.rule-list{grid-template-columns:1fr}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
+@media(max-width:730px){.top{padding:14px 15px 10px}.privacy{display:none}.toolbar{padding:0 15px 14px}.file-name{max-width:100%;order:5;width:100%}.search,.sort,#client-search,.phrase-search,.message-scope{flex:1;min-width:145px;width:auto}.text-panel,.length-panel{margin:0 15px 12px}.text-help,.length-help{min-width:100%}.rule-panel{margin:0 15px 15px}.rule-list{grid-template-columns:1fr}main{padding:0 15px 40px}.clients-grid{grid-template-columns:1fr}.card{height:540px}}
 
 </style>
 </head>
@@ -76,13 +76,17 @@ main{padding:0 28px 48px}.content{max-width:1444px;margin:0 auto}
     <label class="upload" id="drop-zone" for="file-input">Загрузить XLSX<input type="file" id="file-input" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></label>
     <div class="file-name" id="file-name">Файл пока не выбран</div>
     <input class="search" id="client-search" type="search" placeholder="Найти по ID клиента" aria-label="Найти клиента" disabled>
-    <input class="search phrase-search" id="phrase-search" type="search" placeholder="Найти фразу в диалогах" aria-label="Найти фразу в диалогах" disabled>
-    <select class="sort message-scope" id="message-scope" aria-label="Где искать фразу" disabled><option value="all">Все сообщения</option><option value="bot">Бот, Агент и Co-pilot</option><option value="operator">Оператор</option><option value="client">Клиент</option><option value="appeals">Обращения и ответы</option></select>
     <select class="sort" id="client-sort" aria-label="Сортировка клиентов и диалогов" disabled><option value="sessions-desc">Больше сессий сначала</option><option value="sessions-asc">Меньше сессий сначала</option></select>
   </div>
+  <section class="text-panel" aria-label="Поиск по тексту">
+    <strong>Поиск по тексту</strong>
+    <select class="sort message-scope" id="message-scope" aria-label="Где искать фразу" disabled><option value="all">Все сообщения</option><option value="bot">Бот, Агент, IVR, ВА и Co-pilot</option><option value="operator">Оператор</option><option value="client">Клиент</option><option value="appeals">Обращения и ответы</option></select>
+    <input class="search phrase-search" id="phrase-search" type="search" placeholder="Найти фразу в диалогах" aria-label="Найти фразу в диалогах" aria-describedby="text-help" disabled>
+    <span class="text-help" id="text-help">Поиск по подстроке без учёта регистра. Совпадения подсвечиваются в диалоге.</span>
+  </section>
   <section class="length-panel" aria-label="Поиск по длине сообщения">
     <strong>Длина сообщения</strong>
-    <select class="sort length-role" id="length-role" aria-label="Роль для поиска по длине" disabled><option value="client">Клиент</option><option value="bot">Бот / MESSAGE_IVR</option><option value="agent">Агент</option><option value="copilot">Co-pilot</option><option value="operator">Оператор</option><option value="reg-info">Сведения по обращению</option><option value="answer">Ответ по обращению</option></select>
+    <select class="sort length-role" id="length-role" aria-label="Роль для поиска по длине" disabled><option value="client">Клиент</option><option value="bot">Бот / MESSAGE_IVR</option><option value="agent">Агент</option><option value="ivr">IVR</option><option value="va">ВА</option><option value="copilot">Co-pilot</option><option value="operator">Оператор</option><option value="reg-info">Сведения по обращению</option><option value="answer">Ответ по обращению</option></select>
     <input class="search length-query" id="length-query" type="search" placeholder="Например: >500 или 200–500" aria-label="Количество символов или диапазон" aria-describedby="length-help" disabled>
     <span class="length-help" id="length-help" aria-live="polite">Можно указать &gt;500, &gt;=500, 200–500, &lt;100, =50 или 500+. Соседние реплики одной роли считаются вместе.</span>
   </section>
@@ -145,7 +149,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
   const dateLabel = row => row.time===null ? (row.dateRaw || 'Дата не указана') : new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'long',year:'numeric',hour:row.hasTime?'2-digit':undefined,minute:row.hasTime?'2-digit':undefined}).format(row.time);
   const compactDateLabel = row => {if(row.time===null)return row.dateRaw||'Дата не указана';const d=new Date(row.time),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}${row.hasTime?' '+p(d.getHours())+':'+p(d.getMinutes()):''}`;};
   const compareRows = (a,b) => (a.time===null?Infinity:a.time)-(b.time===null?Infinity:b.time)||a.index-b.index;
-  const rolePattern = /^\s*(Бот|Агент|Клиент|Co-pilot|Оператор|Reg info|Answer|MESSAGE_IVR|CLIENT|OPERATOR)\s*:\s*(.*)$/i;
+  const rolePattern = /^\s*(Бот|Агент|IVR|ВА|BA|Клиент|Co-pilot|Оператор|Reg info|Answer|MESSAGE_IVR|CLIENT|OPERATOR)\s*:\s*(.*)$/i;
   function parseMessages(text){
     const messages=[]; let current=null;
     for(const line of text.split('\n')){
@@ -165,7 +169,7 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(key==='answer') return {kind:'answer-msg',name:'Ответ по обращению'};
     if(key==='co-pilot') return {kind:'copilot-msg',name:'Co-pilot'};
     if(key==='оператор'||key==='operator') return {kind:'operator-msg',name:'Оператор'};
-    if(key==='бот'||key==='агент'||key==='message_ivr') return {kind:'bot-msg',name:key==='message_ivr'?'MESSAGE_IVR':key==='агент'?'Агент':'Бот'};
+    if(key==='бот'||key==='агент'||key==='ivr'||key==='ва'||key==='ba'||key==='message_ivr') return {kind:'bot-msg',name:key==='message_ivr'?'MESSAGE_IVR':key==='агент'?'Агент':key==='ivr'?'IVR':key==='ва'||key==='ba'?'ВА':'Бот'};
     return {kind:'event',name:role};
   }
   function showError(message){const content=$('content');content.replaceChildren(node('div','error',message));}
@@ -229,6 +233,8 @@ var o=[];var l=Array.isArray(e);for(f=n.s.c;f<=n.e.c;++f)s[f]=ya(f);for(var c=n.
     if(key==='клиент'||key==='client')return 'client';
     if(key==='бот'||key==='message_ivr')return 'bot';
     if(key==='агент')return 'agent';
+    if(key==='ivr')return 'ivr';
+    if(key==='ва'||key==='ba')return 'va';
     if(key==='co-pilot')return 'copilot';
     if(key==='оператор'||key==='operator')return 'operator';
     if(key==='reg info')return 'reg-info';
