@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>SQL Viewer — офлайн-просмотрщик</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101210;
+      --panel: #171a17;
+      --panel-2: #1e221e;
+      --border: #303630;
+      --text: #e8eee7;
+      --muted: #929c91;
+      --accent: #a7f3a0;
+      --accent-strong: #78df71;
+      --accent-ink: #10210f;
+      --gutter: #161916;
+      --selection: #314b31;
+      --shadow: 0 16px 60px rgba(0, 0, 0, .28);
+      --keyword: #9edcff;
+      --string: #f7ca88;
+      --number: #d9b8ff;
+      --comment: #7f8a7e;
+      --operator: #ff9ab2;
+      --identifier: #e8eee7;
+      --search: #725d11;
+      --search-current: #f4d34d;
+    }
+
+    [data-theme="light"] {
+      color-scheme: light;
+      --bg: #eef1ec;
+      --panel: #ffffff;
+      --panel-2: #f7f9f5;
+      --border: #d6ddd3;
+      --text: #1b211a;
+      --muted: #697267;
+      --accent: #225c2a;
+      --accent-strong: #194d21;
+      --accent-ink: #ffffff;
+      --gutter: #f1f4ef;
+      --selection: #dcebd9;
+      --shadow: 0 16px 60px rgba(31, 45, 29, .12);
+      --keyword: #0067a3;
+      --string: #945d00;
+      --number: #7540a4;
+      --comment: #6f796d;
+      --operator: #a52a4c;
+      --identifier: #1b211a;
+      --search: #ffe88c;
+      --search-current: #ffc400;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      transition: background .2s ease, color .2s ease;
+    }
+
+    button, input, select { font: inherit; }
+
+    button, select, input[type="search"] {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+    }
+
+    button {
+      min-height: 36px;
+      border-radius: 9px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+
+    button:hover { border-color: var(--muted); }
+    button:active { transform: translateY(1px); }
+    button:focus-visible, input:focus-visible, select:focus-visible, .drop-zone:focus-visible {
+      outline: 2px solid var(--accent-strong);
+      outline-offset: 2px;
+    }
+
+    .primary {
+      border-color: var(--accent-strong);
+      background: var(--accent);
+      color: var(--accent-ink);
+      font-weight: 700;
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      height: 100%;
+      padding: 12px;
+      gap: 8px;
+    }
+
+    .topbar, .toolbar, .statusbar {
+      border: 1px solid var(--border);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 58px;
+      padding: 10px 12px;
+      border-radius: 14px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 190px;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: var(--accent-ink);
+      font: 800 12px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+      letter-spacing: -.04em;
+    }
+
+    h1 { margin: 0; font-size: 15px; line-height: 1.15; }
+    .subtitle { margin-top: 3px; color: var(--muted); font-size: 12px; }
+
+    .file-meta {
+      min-width: 0;
+      flex: 1;
+      padding-left: 14px;
+      border-left: 1px solid var(--border);
+    }
+
+    .file-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font: 600 13px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .file-details { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+    .actions { display: flex; align-items: center; gap: 7px; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding: 8px 10px;
+      border-radius: 12px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      flex: 1 1 300px;
+      min-width: 210px;
+      max-width: 560px;
+      height: 36px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel-2);
+      overflow: hidden;
+    }
+
+    .search-box span { padding-left: 10px; color: var(--muted); }
+
+    .search-box input {
+      min-width: 0;
+      flex: 1;
+      height: 100%;
+      border: 0;
+      outline: 0;
+      padding: 0 9px;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .match-count { min-width: 64px; padding-right: 9px; color: var(--muted); text-align: right; font-size: 11px; }
+    .search-nav { display: flex; gap: 4px; }
+    .icon-button { width: 36px; padding: 0; font-size: 17px; }
+
+    select {
+      height: 36px;
+      border-radius: 9px;
+      padding: 0 28px 0 9px;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      height: 36px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel-2);
+      color: var(--muted);
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input { accent-color: var(--accent-strong); }
+
+    .viewer {
+      position: relative;
+      min-height: 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .drop-zone {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background: var(--panel);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .drop-zone.hidden { display: none; }
+
+    .drop-zone.dragging, .viewer.dragging { box-shadow: inset 0 0 0 3px var(--accent-strong); }
+
+    .drop-card { max-width: 520px; }
+
+    .file-symbol {
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      margin: 0 auto 18px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: var(--panel-2);
+      color: var(--accent);
+      font: 800 17px/1 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .drop-title { margin: 0 0 8px; font-size: clamp(20px, 3vw, 30px); }
+    .drop-copy { margin: 0 auto 18px; color: var(--muted); line-height: 1.55; }
+
+    .privacy-note {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .privacy-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-strong); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent); }
+
+    .code-scroll {
+      height: 100%;
+      overflow: auto;
+      overscroll-behavior: contain;
+      background: var(--panel);
+      scrollbar-color: var(--border) transparent;
+    }
+
+    .code {
+      display: table;
+      min-width: 100%;
+      padding: 10px 0 28px;
+      font: 13px/1.65 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      tab-size: 4;
+    }
+
+    .line { display: table-row; }
+    .line:hover .line-text, .line:hover .line-number { background: var(--selection); }
+
+    .line-number {
+      position: sticky;
+      left: 0;
+      z-index: 1;
+      display: table-cell;
+      width: 1%;
+      min-width: 58px;
+      padding: 0 14px 0 10px;
+      border-right: 1px solid var(--border);
+      background: var(--gutter);
+      color: var(--muted);
+      text-align: right;
+      user-select: none;
+    }
+
+    .line-text {
+      display: table-cell;
+      width: 99%;
+      min-width: max-content;
+      padding: 0 18px;
+      white-space: pre;
+    }
+
+    .wrap .code { display: block; }
+    .wrap .line { display: grid; grid-template-columns: 58px minmax(0, 1fr); }
+    .wrap .line-number, .wrap .line-text { display: block; width: auto; min-width: 0; }
+    .wrap .line-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+    .tok-keyword { color: var(--keyword); font-weight: 650; }
+    .tok-string { color: var(--string); }
+    .tok-number { color: var(--number); }
+    .tok-comment { color: var(--comment); font-style: italic; }
+    .tok-operator { color: var(--operator); }
+    .tok-identifier { color: var(--identifier); }
+
+    .search-hit { border-radius: 2px; background: var(--search); color: inherit; }
+    .search-hit.current { background: var(--search-current); color: #191600; outline: 1px solid color-mix(in srgb, var(--search-current) 75%, #000); }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 31px;
+      padding: 6px 10px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      box-shadow: none;
+    }
+
+    .offline { margin-left: auto; display: flex; align-items: center; gap: 6px; color: var(--accent); }
+    .offline::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+    @media (max-width: 760px) {
+      .app { padding: 7px; }
+      .topbar { align-items: flex-start; flex-wrap: wrap; }
+      .brand { min-width: 0; }
+      .file-meta { order: 3; flex-basis: 100%; padding: 8px 0 0; border: 0; border-top: 1px solid var(--border); }
+      .actions { margin-left: auto; }
+      .actions .secondary-label { display: none; }
+      .toolbar > select, .toolbar > .toggle { flex: 1 1 auto; }
+      .statusbar .optional { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">SQL</div>
+        <div>
+          <h1>SQL Viewer</h1>
+          <div class="subtitle">Локальный просмотр</div>
+        </div>
+      </div>
+
+      <div class="file-meta" aria-live="polite">
+        <div class="file-name" id="fileName">Файл не выбран</div>
+        <div class="file-details" id="fileDetails">Откройте или перетащите .sql файл</div>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" id="openButton">Открыть <span class="secondary-label">файл</span></button>
+        <button type="button" class="icon-button" id="themeButton" aria-label="Переключить тему" title="Переключить тему">☀</button>
+      </div>
+    </header>
+
+    <section class="toolbar" aria-label="Инструменты просмотра">
+      <div class="search-box">
+        <span aria-hidden="true">⌕</span>
+        <label class="sr-only" for="searchInput">Поиск по SQL</label>
+        <input id="searchInput" type="search" placeholder="Найти в файле…" autocomplete="off" spellcheck="false">
+        <output class="match-count" id="matchCount">0 из 0</output>
+      </div>
+      <div class="search-nav">
+        <button type="button" class="icon-button" id="prevButton" aria-label="Предыдущее совпадение" title="Предыдущее совпадение (Shift+Enter)">↑</button>
+        <button type="button" class="icon-button" id="nextButton" aria-label="Следующее совпадение" title="Следующее совпадение (Enter)">↓</button>
+      </div>
+
+      <label class="sr-only" for="encodingSelect">Кодировка</label>
+      <select id="encodingSelect" title="Кодировка файла">
+        <option value="auto">Автоопределение</option>
+        <option value="utf-8">UTF-8</option>
+        <option value="windows-1251">Windows-1251</option>
+        <option value="koi8-r">KOI8-R</option>
+        <option value="ibm866">DOS / CP866</option>
+        <option value="iso-8859-5">ISO-8859-5</option>
+        <option value="utf-16le">UTF-16 LE</option>
+        <option value="utf-16be">UTF-16 BE</option>
+      </select>
+
+      <label class="toggle">
+        <input id="wrapToggle" type="checkbox">
+        Перенос строк
+      </label>
+
+      <button type="button" id="copyButton">Копировать всё</button>
+    </section>
+
+    <section class="viewer" id="viewer" aria-label="Содержимое SQL-файла">
+      <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Выбрать SQL-файл">
+        <div class="drop-card">
+          <div class="file-symbol" aria-hidden="true">.SQL</div>
+          <h2 class="drop-title">Откройте SQL-файл</h2>
+          <p class="drop-copy">Перетащите файл сюда или выберите его на компьютере. Подсветка, поиск и просмотр работают прямо в браузере.</p>
+          <button type="button" class="primary" id="dropOpenButton">Выбрать файл</button>
+          <div class="privacy-note"><span class="privacy-dot" aria-hidden="true"></span>Данные остаются на вашем устройстве</div>
+        </div>
+      </div>
+
+      <div class="code-scroll" id="codeScroll" tabindex="0">
+        <div class="code" id="codeOutput" aria-label="SQL-код"></div>
+      </div>
+    </section>
+
+    <footer class="statusbar">
+      <span id="lineStatus">Строк: 0</span>
+      <span id="charStatus">Символов: 0</span>
+      <span class="optional">Ctrl/⌘+O — открыть · Ctrl/⌘+F — поиск</span>
+      <span class="offline">Полностью офлайн</span>
+    </footer>
+  </main>
+
+  <input class="sr-only" id="fileInput" type="file" accept=".sql,.txt,text/plain,application/sql">
+
+  <script>
+    (() => {
+      "use strict";
+
+      const KEYWORDS = new Set((
+        "ADD ALL ALTER ANALYZE AND ANY AS ASC BACKUP BEGIN BETWEEN BY CASE CHECK COLUMN CONSTRAINT CREATE DATABASE DEFAULT DELETE DESC DISTINCT DROP ELSE END EXISTS EXPLAIN FALSE FOREIGN FROM FULL FUNCTION GRANT GROUP HAVING IF IN INDEX INNER INSERT INTERSECT INTO IS JOIN KEY LEFT LIKE LIMIT MERGE NATURAL NOT NULL OFFSET ON OR ORDER OUTER PRIMARY PROCEDURE REFERENCES RETURNING REVOKE RIGHT ROLLBACK ROWS SCHEMA SELECT SET TABLE THEN TOP TRANSACTION TRIGGER TRUE TRUNCATE UNION UNIQUE UPDATE USE USING VALUES VIEW WHEN WHERE WITH"
+      ).split(" "));
+
+      const els = {
+        fileInput: document.getElementById("fileInput"),
+        openButton: document.getElementById("openButton"),
+        dropOpenButton: document.getElementById("dropOpenButton"),
+        dropZone: document.getElementById("dropZone"),
+        viewer: document.getElementById("viewer"),
+        codeScroll: document.getElementById("codeScroll"),
+        codeOutput: document.getElementById("codeOutput"),
+        fileName: document.getElementById("fileName"),
+        fileDetails: document.getElementById("fileDetails"),
+        encodingSelect: document.getElementById("encodingSelect"),
+        wrapToggle: document.getElementById("wrapToggle"),
+        searchInput: document.getElementById("searchInput"),
+        matchCount: document.getElementById("matchCount"),
+        prevButton: document.getElementById("prevButton"),
+        nextButton: document.getElementById("nextButton"),
+        copyButton: document.getElementById("copyButton"),
+        themeButton: document.getElementById("themeButton"),
+        lineStatus: document.getElementById("lineStatus"),
+        charStatus: document.getElementById("charStatus")
+      };
+
+      let sourceText = "";
+      let currentFile = null;
+      let currentBuffer = null;
+      let currentMatch = -1;
+      let totalMatches = 0;
+      let renderTimer = 0;
+
+      const escapeHtml = (value) => value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+
+      const formatBytes = (bytes) => {
+        if (bytes < 1024) return `${bytes} Б`;
+        if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} КБ`;
+        return `${(bytes / (1024 * 1024)).toFixed(1)} МБ`;
+      };
+
+      const ENCODING_NAMES = {
+        "utf-8": "UTF-8",
+        "windows-1251": "Windows-1251",
+        "koi8-r": "KOI8-R",
+        "ibm866": "DOS / CP866",
+        "iso-8859-5": "ISO-8859-5",
+        "utf-16le": "UTF-16 LE",
+        "utf-16be": "UTF-16 BE"
+      };
+
+      function decodeAs(buffer, encoding, fatal = false) {
+        return new TextDecoder(encoding, { fatal }).decode(buffer).replace(/^\uFEFF/, "");
+      }
+
+      function textQuality(text) {
+        const count = (pattern) => (text.match(pattern) || []).length;
+        let score = 0;
+        score += count(/[А-Яа-яЁё]/g) * 2;
+        score += count(/(?:ст|но|ен|то|на|ов|ни|ра|во|ко|пр|ре|по|ро|ос|ер|ли|го)/gi) * 7;
+        score += count(/\b(?:select|insert|update|delete|create|table|from|where|values|join)\b/gi) * 4;
+        score -= count(/\uFFFD/g) * 200;
+        score -= count(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g) * 40;
+        score -= count(/[╔╗╚╝║═░▒▓■]/g) * 8;
+        score -= count(/[ЂЃЄЅІЇЈЉЊЋЌЎЏ]/g) * 3;
+        return score;
+      }
+
+      function detectAndDecode(buffer) {
+        const bytes = new Uint8Array(buffer);
+
+        if (bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+          return { text: decodeAs(buffer, "utf-8"), encoding: "utf-8" };
+        }
+        if (bytes[0] === 0xFF && bytes[1] === 0xFE) {
+          return { text: decodeAs(buffer, "utf-16le"), encoding: "utf-16le" };
+        }
+        if (bytes[0] === 0xFE && bytes[1] === 0xFF) {
+          return { text: decodeAs(buffer, "utf-16be"), encoding: "utf-16be" };
+        }
+
+        const sampleLength = Math.min(bytes.length, 4096);
+        let evenZeroes = 0;
+        let oddZeroes = 0;
+        for (let i = 0; i < sampleLength; i++) {
+          if (bytes[i] === 0) i % 2 ? oddZeroes++ : evenZeroes++;
+        }
+        if (sampleLength > 8 && oddZeroes > sampleLength * 0.2 && oddZeroes > evenZeroes * 3) {
+          return { text: decodeAs(buffer, "utf-16le"), encoding: "utf-16le" };
+        }
+        if (sampleLength > 8 && evenZeroes > sampleLength * 0.2 && evenZeroes > oddZeroes * 3) {
+          return { text: decodeAs(buffer, "utf-16be"), encoding: "utf-16be" };
+        }
+
+        try {
+          return { text: decodeAs(buffer, "utf-8", true), encoding: "utf-8" };
+        } catch {
+          const candidates = ["windows-1251", "koi8-r", "ibm866", "iso-8859-5"]
+            .map((encoding) => {
+              const text = decodeAs(buffer, encoding);
+              return { text, encoding, score: textQuality(text) };
+            })
+            .sort((a, b) => b.score - a.score);
+          return candidates[0];
+        }
+      }
+
+      function applyEncoding() {
+        if (!currentFile || !currentBuffer) return;
+        const selected = els.encodingSelect.value;
+        const decoded = selected === "auto"
+          ? detectAndDecode(currentBuffer)
+          : { text: decodeAs(currentBuffer, selected), encoding: selected };
+
+        sourceText = decoded.text;
+        currentMatch = -1;
+        els.fileName.textContent = currentFile.name;
+        const encodingText = selected === "auto"
+          ? `Авто → ${ENCODING_NAMES[decoded.encoding]}`
+          : ENCODING_NAMES[decoded.encoding];
+        els.fileDetails.textContent = `${formatBytes(currentFile.size)} · ${encodingText}`;
+        els.dropZone.classList.add("hidden");
+        render();
+        els.codeScroll.scrollTo({ top: 0, left: 0 });
+      }
+
+      function tokenizeLine(line, state) {
+        const spans = [];
+        let i = 0;
+
+        const push = (start, end, type) => spans.push({ start, end, type });
+
+        while (i < line.length) {
+          const start = i;
+
+          if (state.blockComment) {
+            const endAt = line.indexOf("*/", i);
+            if (endAt === -1) {
+              push(i, line.length, "comment");
+              i = line.length;
+            } else {
+              i = endAt + 2;
+              push(start, i, "comment");
+              state.blockComment = false;
+            }
+            continue;
+          }
+
+          if (line.startsWith("--", i) || line[i] === "#") {
+            push(i, line.length, "comment");
+            break;
+          }
+
+          if (line.startsWith("/*", i)) {
+            const endAt = line.indexOf("*/", i + 2);
+            if (endAt === -1) {
+              push(i, line.length, "comment");
+              state.blockComment = true;
+              break;
+            }
+            i = endAt + 2;
+            push(start, i, "comment");
+            continue;
+          }
+
+          const quote = line[i];
+          if (quote === "'" || quote === '"' || quote === "`") {
+            i++;
+            while (i < line.length) {
+              if (line[i] === "\\") {
+                i += Math.min(2, line.length - i);
+                continue;
+              }
+              if (line[i] === quote) {
+                if (line[i + 1] === quote) {
+                  i += 2;
+                  continue;
+                }
+                i++;
+                break;
+              }
+              i++;
+            }
+            push(start, i, "string");
+            continue;
+          }
+
+          if (/\d/.test(line[i])) {
+            const match = line.slice(i).match(/^(?:0x[\da-f]+|\d+(?:\.\d+)?(?:e[+-]?\d+)?)/i);
+            i += match[0].length;
+            push(start, i, "number");
+            continue;
+          }
+
+          if (/[A-Za-z_]/.test(line[i])) {
+            const match = line.slice(i).match(/^[A-Za-z_][A-Za-z0-9_$]*/);
+            i += match[0].length;
+            push(start, i, KEYWORDS.has(match[0].toUpperCase()) ? "keyword" : "identifier");
+            continue;
+          }
+
+          if (/[+\-*\/%=<>!|&^~:]/.test(line[i])) {
+            i++;
+            while (i < line.length && /[+\-*\/%=<>!|&^~:]/.test(line[i])) i++;
+            push(start, i, "operator");
+            continue;
+          }
+
+          i++;
+          push(start, i, "plain");
+        }
+
+        if (!spans.length) spans.push({ start: 0, end: 0, type: "plain" });
+        return spans;
+      }
+
+      function lineMatches(line, query, startIndex) {
+        if (!query) return [];
+        const result = [];
+        const haystack = line.toLocaleLowerCase("ru");
+        const needle = query.toLocaleLowerCase("ru");
+        let at = 0;
+        while (needle && (at = haystack.indexOf(needle, at)) !== -1) {
+          result.push({ start: at, end: at + needle.length, index: startIndex + result.length });
+          at += Math.max(needle.length, 1);
+        }
+        return result;
+      }
+
+      function renderLine(line, spans, matches) {
+        const boundaries = new Set([0, line.length]);
+        spans.forEach((span) => { boundaries.add(span.start); boundaries.add(span.end); });
+        matches.forEach((match) => { boundaries.add(match.start); boundaries.add(match.end); });
+        const points = [...boundaries].sort((a, b) => a - b);
+        let html = "";
+
+        for (let i = 0; i < points.length - 1; i++) {
+          const start = points[i];
+          const end = points[i + 1];
+          if (end <= start) continue;
+          const token = spans.find((span) => start >= span.start && start < span.end);
+          const match = matches.find((item) => start >= item.start && start < item.end);
+          const classes = [];
+          if (token && token.type !== "plain") classes.push(`tok-${token.type}`);
+          if (match) {
+            classes.push("search-hit");
+            if (match.index === currentMatch) classes.push("current");
+          }
+          const text = escapeHtml(line.slice(start, end));
+          html += classes.length
+            ? `<span class="${classes.join(" ")}"${match && match.index === currentMatch ? ' id="currentSearchHit"' : ""}>${text}</span>`
+            : text;
+        }
+
+        return html || "&nbsp;";
+      }
+
+      function countMatches(lines, query) {
+        if (!query) return 0;
+        const needle = query.toLocaleLowerCase("ru");
+        let count = 0;
+        for (const line of lines) {
+          const haystack = line.toLocaleLowerCase("ru");
+          let at = 0;
+          while ((at = haystack.indexOf(needle, at)) !== -1) {
+            count++;
+            at += Math.max(needle.length, 1);
+          }
+        }
+        return count;
+      }
+
+      function render({ scrollToMatch = false } = {}) {
+        const lines = sourceText.replace(/\r\n?/g, "\n").split("\n");
+        const query = els.searchInput.value;
+        totalMatches = countMatches(lines, query);
+        if (!totalMatches) currentMatch = -1;
+        else if (currentMatch < 0 || currentMatch >= totalMatches) currentMatch = 0;
+
+        const state = { blockComment: false };
+        let matchOffset = 0;
+        const html = lines.map((line, index) => {
+          const spans = tokenizeLine(line, state);
+          const matches = lineMatches(line, query, matchOffset);
+          matchOffset += matches.length;
+          return `<div class="line" data-line="${index + 1}"><span class="line-number">${index + 1}</span><span class="line-text">${renderLine(line, spans, matches)}</span></div>`;
+        }).join("");
+
+        els.codeOutput.innerHTML = html;
+        els.matchCount.value = totalMatches ? `${currentMatch + 1} из ${totalMatches}` : "0 из 0";
+        els.matchCount.textContent = els.matchCount.value;
+        els.lineStatus.textContent = `Строк: ${sourceText ? lines.length : 0}`;
+        els.charStatus.textContent = `Символов: ${sourceText.length.toLocaleString("ru-RU")}`;
+
+        if (scrollToMatch) {
+          requestAnimationFrame(() => document.getElementById("currentSearchHit")?.scrollIntoView({ block: "center", inline: "center" }));
+        }
+      }
+
+      function scheduleRender() {
+        clearTimeout(renderTimer);
+        renderTimer = setTimeout(() => {
+          currentMatch = -1;
+          render({ scrollToMatch: true });
+        }, 120);
+      }
+
+      function moveMatch(direction) {
+        if (!totalMatches) return;
+        currentMatch = (currentMatch + direction + totalMatches) % totalMatches;
+        render({ scrollToMatch: true });
+      }
+
+      function openPicker() {
+        els.fileInput.click();
+      }
+
+      function loadFile(file) {
+        if (!file) return;
+        currentFile = file;
+        const reader = new FileReader();
+        reader.onload = () => {
+          currentBuffer = reader.result;
+          applyEncoding();
+        };
+        reader.onerror = () => {
+          els.fileName.textContent = "Не удалось прочитать файл";
+          els.fileDetails.textContent = "Попробуйте выбрать файл ещё раз";
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      [els.openButton, els.dropOpenButton].forEach((button) => button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        openPicker();
+      }));
+
+      els.dropZone.addEventListener("click", openPicker);
+      els.dropZone.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          openPicker();
+        }
+      });
+
+      els.fileInput.addEventListener("change", () => loadFile(els.fileInput.files[0]));
+      els.encodingSelect.addEventListener("change", applyEncoding);
+      els.searchInput.addEventListener("input", scheduleRender);
+      els.searchInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          moveMatch(event.shiftKey ? -1 : 1);
+        }
+      });
+      els.prevButton.addEventListener("click", () => moveMatch(-1));
+      els.nextButton.addEventListener("click", () => moveMatch(1));
+      els.wrapToggle.addEventListener("change", () => els.codeScroll.classList.toggle("wrap", els.wrapToggle.checked));
+
+      els.copyButton.addEventListener("click", async () => {
+        if (!sourceText) return;
+        try {
+          await navigator.clipboard.writeText(sourceText);
+          const original = els.copyButton.textContent;
+          els.copyButton.textContent = "Скопировано";
+          setTimeout(() => { els.copyButton.textContent = original; }, 1300);
+        } catch {
+          const area = document.createElement("textarea");
+          area.value = sourceText;
+          area.style.position = "fixed";
+          area.style.opacity = "0";
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand("copy");
+          area.remove();
+        }
+      });
+
+      const themeStorage = {
+        get() {
+          try { return localStorage.getItem("sql-viewer-theme"); }
+          catch { return null; }
+        },
+        set(value) {
+          try { localStorage.setItem("sql-viewer-theme", value); }
+          catch { /* В приватном режиме тема просто не сохраняется. */ }
+        }
+      };
+
+      const savedTheme = themeStorage.get();
+      if (savedTheme === "light") document.documentElement.dataset.theme = "light";
+
+      function updateThemeButton() {
+        const isLight = document.documentElement.dataset.theme === "light";
+        els.themeButton.textContent = isLight ? "☾" : "☀";
+        els.themeButton.title = isLight ? "Включить тёмную тему" : "Включить светлую тему";
+      }
+      updateThemeButton();
+
+      els.themeButton.addEventListener("click", () => {
+        const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+        document.documentElement.dataset.theme = next;
+        themeStorage.set(next);
+        updateThemeButton();
+      });
+
+      let dragDepth = 0;
+      document.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        dragDepth++;
+        els.viewer.classList.add("dragging");
+        els.dropZone.classList.add("dragging");
+      });
+      document.addEventListener("dragover", (event) => event.preventDefault());
+      document.addEventListener("dragleave", (event) => {
+        event.preventDefault();
+        dragDepth--;
+        if (dragDepth <= 0) {
+          dragDepth = 0;
+          els.viewer.classList.remove("dragging");
+          els.dropZone.classList.remove("dragging");
+        }
+      });
+      document.addEventListener("drop", (event) => {
+        event.preventDefault();
+        dragDepth = 0;
+        els.viewer.classList.remove("dragging");
+        els.dropZone.classList.remove("dragging");
+        loadFile(event.dataTransfer.files[0]);
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "o") {
+          event.preventDefault();
+          openPicker();
+        }
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") {
+          event.preventDefault();
+          els.searchInput.focus();
+          els.searchInput.select();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
