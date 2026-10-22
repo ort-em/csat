@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-RHmfjwTKeu99VyFAL06Y2WZPIokBoWn4poYzANnZV50=' 'sha256-f1wCUVGNiHFXWsGEp9b0hd0eeLn6nwXhNZgcWXCr3f4=' 'sha256-A4LkJuzALHBLuawZ7KJ2LKgU5/iUnZEpqQLdJRuxFMU=' 'sha256-rOxhSleiJCV31dAMg5sF22NUm/GlAYNAeS1nHLv/+34=' 'sha256-B+oxPFNSbmShaWgctGQXcTHHev0sBTqcvW/FEovxl8A='; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'self' about:; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'sha256-RHmfjwTKeu99VyFAL06Y2WZPIokBoWn4poYzANnZV50=' 'sha256-f1wCUVGNiHFXWsGEp9b0hd0eeLn6nwXhNZgcWXCr3f4=' 'sha256-NksbXyhL9ErZPbov1I/p7RzzBkOMABlQSrEi8p7Kayc=' 'sha256-Lk4f1c3uvXDgTCcv5ZTEzOITjPSp39eOHsP3ilDFM7g=' 'sha256-B+oxPFNSbmShaWgctGQXcTHHev0sBTqcvW/FEovxl8A='; img-src data:; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; frame-src 'self' about:; base-uri 'none'; form-action 'none'">
   <title>SQL, Notebook, JSON & BPMN — офлайн-просмотрщик</title>
   <style>
     :root {
@@ -1637,8 +1637,24 @@
 .bpmn-note-head span { flex: 1; font: 600 11px/1.4 system-ui, sans-serif; color: #4d5144; }
 .bpmn-note-head button { display: grid; place-items: center; width: 24px; height: 24px; min-height: 24px; border: 0; border-radius: 5px; padding: 0; background: transparent; color: #514b39; font-size: 19px; cursor: pointer; }
 .bpmn-note-head button:hover { background: #00000012; }
-.bpmn-note textarea { display: block; flex: 1; width: 100%; min-height: 0; padding: 10px 12px 18px; margin: 0; border: 0; outline: 0; resize: none; background: transparent; color: #252b24; font: 14px/1.5 system-ui, sans-serif; overflow: auto; }
-.bpmn-note textarea::placeholder { color: #77735d; }
+.bpmn-note-editor { display: block; flex: 1; width: 100%; min-height: 0; padding: 10px 12px 18px; margin: 0; border: 0; outline: 0; background: transparent; color: #252b24; font: 14px/1.5 system-ui, sans-serif; overflow: auto; overflow-wrap: anywhere; cursor: text; white-space: pre-wrap; user-select: text; }
+.bpmn-note-editor:empty::before { content: attr(data-placeholder); color: #77735d; pointer-events: none; }
+.bpmn-note-editor p, .bpmn-note-editor ul, .bpmn-note-editor ol { margin: 0 0 5px; }
+.bpmn-note-editor ul, .bpmn-note-editor ol { padding-left: 23px; }
+.bpmn-format { min-height: 43px; gap: 5px; padding-top: 5px; padding-bottom: 5px; }
+.bpmn-format-label { color: var(--muted, #697267); margin-right: 5px; }
+.bpmn-format button { min-width: 30px; }
+.bpmn-format input[type=color] { width: 30px; padding: 2px; }
+.bpmn-format button[aria-pressed=true], .bpmn-tools button.is-active { background: var(--selection, #dcebd9); border-color: var(--accent, #275d39); }
+.bpmn-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
+.bpmn-line { fill: none; stroke: #52714f; stroke-width: 2; pointer-events: none; }
+.bpmn-line.is-selected { stroke: #2084c9; stroke-width: 3; }
+.bpmn-line-hit { fill: none; stroke: transparent; stroke-width: 14; pointer-events: stroke; cursor: pointer; }
+.bpmn-line-dot { fill: #52714f; pointer-events: none; }
+.bpmn-line-preview { stroke-dasharray: 6 4; opacity: .7; }
+.bpmn-connecting .bpmn-stage, .bpmn-connecting .bpmn-stage * { cursor: crosshair !important; }
+.bpmn-connecting .bpmn-note-editor { caret-color: transparent; }
+.bpmn-export-bpmn { font-weight: 650 !important; }
 .bpmn-note-resize { position: absolute; right: 0; bottom: 0; width: 22px; height: 22px; min-height: 22px; border: 0; border-radius: 0; padding: 0; background: linear-gradient(135deg, transparent 55%, #655f4760 56%, #655f4760 62%, transparent 63%, transparent 73%, #655f4760 74%, #655f4760 80%, transparent 81%); cursor: nwse-resize; touch-action: none; }
 .bpmn-note-resize:focus-visible, .bpmn-note-head:focus-visible { outline: 2px solid #39764c; outline-offset: -2px; }
 .bpmn-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; min-height: 34px; padding: 7px 12px; background: var(--panel, #fff); border-top: 1px solid var(--border, #d6ddd3); font-size: 11px; color: var(--muted, #697267); }
@@ -1938,6 +1954,8 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
   'use strict';
   const FORMAT = 'offline-bpmn-comments';
   const COLORS = ['yellow', 'blue', 'green', 'pink'];
+  const NS = { bpmn: 'http://www.omg.org/spec/BPMN/20100524/MODEL', bpmndi: 'http://www.omg.org/spec/BPMN/20100524/DI', dc: 'http://www.omg.org/spec/DD/20100524/DC', di: 'http://www.omg.org/spec/DD/20100524/DI', vc: 'https://offline-bpmn-viewer.local/schema/comments/1.0', bioc: 'http://bpmn.io/schema/bpmn/biocolor/1.0' };
+  const uid = prefix => prefix + '-' + crypto.randomUUID();
   const instances = new Set();
   const clamp = (value, min, max, fallback = min) => {
     const n = Number(value);
@@ -1952,6 +1970,81 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
   const decode = text => new TextDecoder('utf-8', { fatal: true }).decode(Uint8Array.from(atob(text.trim()), c => c.charCodeAt(0)));
   const safeHtml = text => String(text).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  function sanitizeHtml(html) {
+    const template = document.createElement('template');
+    template.innerHTML = String(html);
+    const allowed = new Set('B STRONG I EM U S STRIKE BR P DIV UL OL LI SPAN FONT'.split(' '));
+    const blocked = new Set('SCRIPT STYLE IFRAME OBJECT EMBED SVG MATH IMG VIDEO AUDIO LINK META TEMPLATE'.split(' '));
+    const clean = node => {
+      if (node.nodeType === Node.TEXT_NODE) return document.createTextNode(node.textContent);
+      const out = document.createDocumentFragment();
+      if (node.nodeType !== Node.ELEMENT_NODE || blocked.has(node.tagName)) return out;
+      const el = allowed.has(node.tagName) ? document.createElement(node.tagName === 'FONT' ? 'span' : node.tagName.toLowerCase()) : out;
+      if (el.nodeType === Node.ELEMENT_NODE) {
+        const style = node.style;
+        for (const key of ['fontWeight', 'fontStyle', 'textDecorationLine', 'textAlign']) {
+          const value = style[key];
+          if (/^(bold|[1-9]00|italic|underline|line-through|underline line-through|left|center|right)$/.test(value)) el.style[key] = value;
+        }
+        const size = style.fontSize || ({ 1: '10px', 2: '12px', 3: '14px', 4: '18px', 5: '24px', 6: '32px', 7: '40px' }[node.getAttribute('size')]);
+        if (/^\d+(\.\d+)?px$/.test(size || '')) el.style.fontSize = clamp(parseFloat(size), 10, 48) + 'px';
+        const color = style.color || node.getAttribute('color') || '';
+        if (/^(#[0-9a-f]{3,8}|rgba?\([\d.,%\s]+\)|[a-z]{3,20})$/i.test(color) && CSS.supports('color', color)) el.style.color = color;
+      }
+      for (const child of node.childNodes) el.append(clean(child));
+      return el;
+    };
+    const container = document.createElement('div');
+    for (const node of template.content.childNodes) container.append(clean(node));
+    return container.innerHTML;
+  }
+  function plainText(html) {
+    const template = document.createElement('template'); template.innerHTML = html;
+    const walk = node => {
+      if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+      if (node.nodeName === 'BR') return '\n';
+      let text = [...node.childNodes].map(walk).join('');
+      if (node.nodeName === 'LI') text = (node.parentNode.nodeName === 'OL' ? ([...node.parentNode.children].indexOf(node) + 1) + '. ' : '• ') + text;
+      return text + (/^(DIV|P|LI|UL|OL)$/.test(node.nodeName) ? '\n' : '');
+    };
+    return [...template.content.childNodes].map(walk).join('').replace(/\n{3,}/g, '\n\n').trimEnd();
+  }
+  const rectPoint = (rect, target) => {
+    const cx = rect.x + rect.width / 2, cy = rect.y + rect.height / 2;
+    const dx = target.x - cx, dy = target.y - cy;
+    const scale = Math.max(Math.abs(dx) / Math.max(rect.width / 2, .5), Math.abs(dy) / Math.max(rect.height / 2, .5));
+    return scale ? { x: cx + dx / scale, y: cy + dy / scale } : { x: cx, y: cy };
+  };
+
+  // Read only our own extension elements; preserve all other XML and extensions.
+  function readBpmn(xml, name) {
+    const doc = new DOMParser().parseFromString(xml, 'application/xml');
+    if (doc.querySelector('parsererror')) return { xml, name };
+    const cards = [...doc.getElementsByTagNameNS(NS.vc, 'card')];
+    if (!cards.length) return { xml, name };
+    const shapes = [...doc.getElementsByTagNameNS(NS.bpmndi, 'BPMNShape')];
+    const notes = cards.map(card => {
+      const note = JSON.parse(decode(card.textContent));
+      const annotation = card.parentElement.parentElement;
+      if (annotation.namespaceURI !== NS.bpmn || annotation.localName !== 'textAnnotation') throw new Error('Некорректное расширение карточки в BPMN.');
+      const shape = shapes.find(el => el.getAttribute('bpmnElement') === annotation.getAttribute('id'));
+      const bounds = shape?.getElementsByTagNameNS(NS.dc, 'Bounds')[0];
+      if (bounds) for (const key of ['x', 'y', 'width', 'height']) note[key] = Number(bounds.getAttribute(key));
+      const text = [...annotation.children].find(el => el.localName === 'text' && el.namespaceURI === NS.bpmn)?.textContent || '';
+      if (text !== note.text) { note.text = text; note.html = safeHtml(text).replace(/\n/g, '<br>'); }
+      return note;
+    });
+    const generated = new Set();
+    for (const kind of ['card', 'anchor', 'line']) {
+      for (const marker of [...doc.getElementsByTagNameNS(NS.vc, kind)]) {
+        const element = marker.parentElement?.parentElement;
+        if (element?.namespaceURI === NS.bpmn && ['textAnnotation', 'association'].includes(element.localName)) { generated.add(element.getAttribute('id')); element.remove(); }
+      }
+    }
+    for (const tag of ['BPMNShape', 'BPMNEdge']) for (const el of [...doc.getElementsByTagNameNS(NS.bpmndi, tag)]) if (generated.has(el.getAttribute('bpmnElement'))) el.remove();
+    return { xml: new XMLSerializer().serializeToString(doc), name, notes };
+  }
+
   function readPayload(text) {
     const doc = new DOMParser().parseFromString(text, 'text/html');
     const block = doc.getElementById('bpmn-data');
@@ -1963,20 +2056,33 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     if (!data || data.format !== FORMAT || data.version !== 1 || typeof data.xml !== 'string') {
       throw new Error('Неизвестный формат сохранённой BPMN-схемы.');
     }
+    const ids = new Set();
+    const notes = Array.isArray(data.notes) ? data.notes.filter(n => n && typeof n === 'object').map(n => {
+      let id = typeof n.id === 'string' && /^[\w-]{1,160}$/.test(n.id) ? n.id : uid('note');
+      if (ids.has(id)) id = uid('note');
+      ids.add(id);
+      const html = sanitizeHtml(typeof n.html === 'string' ? n.html : safeHtml(typeof n.text === 'string' ? n.text : '').replace(/\n/g, '<br>'));
+      return {
+        id, html, text: plainText(html),
+        x: clamp(n.x, -1e7, 1e7, 0), y: clamp(n.y, -1e7, 1e7, 0),
+        width: clamp(n.width, 160, 1600, 280), height: clamp(n.height, 100, 1200, 170),
+        color: COLORS.includes(n.color) ? n.color : 'yellow',
+        rootId: typeof n.rootId === 'string' ? n.rootId : '',
+        scopeId: typeof n.scopeId === 'string' ? n.scopeId : '',
+        diagramId: typeof n.diagramId === 'string' ? n.diagramId : '',
+        links: Array.isArray(n.links) ? n.links.filter(l => l && ['point', 'element', 'note'].includes(l.kind)).map(l => ({
+          id: uid('link'), kind: l.kind, targetId: typeof l.targetId === 'string' ? l.targetId : '',
+          x: clamp(l.x, -1e7, 1e7, 0), y: clamp(l.y, -1e7, 1e7, 0)
+        })) : []
+      };
+    }) : [];
     return {
       format: FORMAT, version: 1, xml: data.xml,
       name: typeof data.name === 'string' ? data.name : 'Схема.bpmn',
       diagramId: typeof data.diagramId === 'string' ? data.diagramId : '',
       rootId: typeof data.rootId === 'string' ? data.rootId : '',
       viewbox: data.viewbox && Number.isFinite(data.viewbox.x) && Number.isFinite(data.viewbox.y) && data.viewbox.width > 0 && data.viewbox.height > 0 ? data.viewbox : null,
-      notes: Array.isArray(data.notes) ? data.notes.filter(n => n && typeof n === 'object').map((n, index) => ({
-        id: 'note-' + index, text: typeof n.text === 'string' ? n.text : '',
-        x: clamp(n.x, -1e7, 1e7, 0), y: clamp(n.y, -1e7, 1e7, 0),
-        width: clamp(n.width, 160, 1600, 280), height: clamp(n.height, 100, 1200, 170),
-        color: COLORS.includes(n.color) ? n.color : 'yellow',
-        rootId: typeof n.rootId === 'string' ? n.rootId : '',
-        diagramId: typeof n.diagramId === 'string' ? n.diagramId : ''
-      })) : []
+      notes
     };
   }
 
@@ -1991,6 +2097,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
       this.history = [];
       this.future = [];
       this.nodes = new Map();
+      this.selectionRange = null;
       host.classList.add('bpmn-workspace');
       host.innerHTML = `
         <div class="bpmn-tools" role="toolbar" aria-label="BPMN и комментарии">
@@ -2000,6 +2107,9 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
           <span aria-hidden="true">×</span>
           <label>В <input class="bpmn-height" type="number" min="100" max="1200" step="10" value="170" aria-label="Высота карточки"></label>
           <select class="bpmn-color" aria-label="Цвет карточки"><option value="yellow">Жёлтая</option><option value="blue">Голубая</option><option value="green">Зелёная</option><option value="pink">Розовая</option></select>
+          <button type="button" class="bpmn-duplicate" disabled title="Создать копию выбранной карточки">⧉ Дубликат</button>
+          <button type="button" class="bpmn-connect" disabled title="Выберите карточку, затем нажмите здесь и укажите конец линии">↗ Линия</button>
+          <button type="button" class="bpmn-remove-line" disabled>Удалить линию</button>
           <button type="button" class="bpmn-undo" disabled title="Отменить (Ctrl/⌘+Z)" aria-label="Отменить изменение">↶</button>
           <button type="button" class="bpmn-redo" disabled title="Повторить (Ctrl/⌘+Shift+Z)" aria-label="Повторить изменение">↷</button>
           <button type="button" class="bpmn-minus" disabled aria-label="Уменьшить масштаб">−</button>
@@ -2008,21 +2118,37 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
           <button type="button" class="bpmn-fit" disabled title="Показать схему и все карточки">Вписать всё</button>
           <select class="bpmn-diagrams" aria-label="Диаграмма BPMN" hidden></select>
           <button type="button" class="bpmn-export" disabled>Скачать HTML</button>
+          <button type="button" class="bpmn-export-bpmn" disabled>Скачать BPMN</button>
+        </div>
+        <div class="bpmn-tools bpmn-format" role="toolbar" aria-label="Форматирование текста карточки">
+          <span class="bpmn-format-label">Текст карточки</span>
+          <button type="button" data-command="bold" aria-label="Жирный" title="Жирный (Ctrl/⌘+B)"><b>B</b></button>
+          <button type="button" data-command="italic" aria-label="Курсив" title="Курсив (Ctrl/⌘+I)"><i>I</i></button>
+          <button type="button" data-command="underline" aria-label="Подчёркнутый" title="Подчёркнутый (Ctrl/⌘+U)"><u>U</u></button>
+          <button type="button" data-command="strikeThrough" aria-label="Зачёркнутый" title="Зачёркнутый"><s>S</s></button>
+          <select class="bpmn-font-size" aria-label="Размер текста"><option value="12">12 px</option><option value="14" selected>14 px</option><option value="18">18 px</option><option value="24">24 px</option><option value="32">32 px</option></select>
+          <label title="Цвет текста">A <input class="bpmn-text-color" type="color" value="#252b24" aria-label="Цвет текста"></label>
+          <button type="button" data-command="insertUnorderedList" aria-label="Маркированный список" title="Маркированный список">• Список</button>
+          <button type="button" data-command="insertOrderedList" aria-label="Нумерованный список" title="Нумерованный список">1. Список</button>
+          <button type="button" data-command="justifyLeft" aria-label="По левому краю" title="По левому краю">≡ ←</button>
+          <button type="button" data-command="justifyCenter" aria-label="По центру" title="По центру">≡</button>
+          <button type="button" data-command="justifyRight" aria-label="По правому краю" title="По правому краю">→ ≡</button>
+          <button type="button" data-command="removeFormat" title="Убрать форматирование выделенного текста">Сбросить</button>
         </div>
         <div class="bpmn-stage">
-          <div class="bpmn-canvas"></div><div class="bpmn-notes" aria-label="Карточки комментариев"></div>
+          <div class="bpmn-canvas"></div><svg class="bpmn-lines" aria-label="Линии комментариев"><g></g></svg><div class="bpmn-notes" aria-label="Карточки комментариев"></div>
           <div class="bpmn-error" role="status">Открываем BPMN-схему…</div>
         </div>
-        <div class="bpmn-foot"><span class="bpmn-count">Карточек: 0</span><span class="bpmn-help">Перетаскивайте карточку за заголовок, меняйте размер за угол. Двойной щелчок по схеме — новая карточка.</span><span class="bpmn-message" role="status" aria-live="polite"></span></div>`;
+        <div class="bpmn-foot"><span class="bpmn-count">Карточек: 0</span><span class="bpmn-help">↗ — провести линию к элементу, карточке или точке. Escape — отмена. Двойной щелчок по линии — удалить.</span><span class="bpmn-message" role="status" aria-live="polite"></span></div>`;
       this.ui = {};
-      for (const name of ['add', 'width', 'height', 'color', 'undo', 'redo', 'minus', 'plus', 'fit', 'zoom', 'diagrams', 'export', 'stage', 'canvas', 'notes', 'error', 'count', 'message']) this.ui[name] = host.querySelector('.bpmn-' + name);
+      for (const name of ['add', 'width', 'height', 'color', 'undo', 'redo', 'minus', 'plus', 'fit', 'zoom', 'diagrams', 'export', 'export-bpmn', 'stage', 'canvas', 'notes', 'error', 'count', 'message', 'duplicate', 'connect', 'remove-line', 'format', 'font-size', 'text-color', 'lines']) this.ui[name] = host.querySelector('.bpmn-' + name);
       this.viewer = new BpmnJS({ container: this.ui.canvas, width: '100%', height: '100%' });
       this.canvas = this.viewer.get('canvas');
       const bus = this.viewer.get('eventBus');
       bus.on('canvas.viewbox.changed', () => this.syncView());
       bus.on('root.set', () => { if (this.ready) { this.selected = null; this.drawNotes(); this.syncView(); } });
       bus.on('element.dblclick', 2000, event => {
-        if (this.ready && event.originalEvent && !event.originalEvent.target.closest('.bjs-drilldown')) {
+        if (this.ready && !this.connecting && event.originalEvent && !event.originalEvent.target.closest('.bjs-drilldown')) {
           this.addAtClient(event.originalEvent.clientX, event.originalEvent.clientY);
           event.originalEvent.preventDefault();
           return false;
@@ -2035,10 +2161,30 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
       this.ui.undo.onclick = () => this.undo();
       this.ui.redo.onclick = () => this.redo();
       this.ui.export.onclick = () => this.download();
+      this.ui['export-bpmn'].onclick = () => this.downloadBpmn();
+      this.ui.duplicate.onclick = () => this.duplicate(this.selected);
+      this.ui.connect.onclick = () => this.beginConnect(this.selected);
+      this.ui['remove-line'].onclick = () => this.removeLine();
+      for (const button of this.ui.format.querySelectorAll('[data-command]')) {
+        button.addEventListener('mousedown', event => event.preventDefault());
+        button.onclick = () => this.format(button.dataset.command);
+      }
+      this.ui['font-size'].onchange = () => this.format('fontSize', this.ui['font-size'].value);
+      this.ui['text-color'].oninput = () => this.format('foreColor', this.ui['text-color'].value);
+      this.selectionHandler = () => this.rememberSelection();
+      document.addEventListener('selectionchange', this.selectionHandler);
       for (const key of ['width', 'height', 'color']) this.ui[key].addEventListener('change', () => this.changeProperty(key));
       this.ui.diagrams.onchange = () => this.openDiagram(this.ui.diagrams.value);
       this.ui.stage.addEventListener('pointerdown', event => {
-        if (!event.target.closest('.bpmn-note')) this.select(null);
+        if (!this.connecting && !event.target.closest('.bpmn-note, .bpmn-line-hit')) this.select(null);
+      });
+      this.ui.stage.addEventListener('click', event => {
+        if (!this.connecting || event.target.closest('.bpmn-note-link')) return;
+        event.preventDefault(); event.stopPropagation();
+        this.finishConnect(event);
+      }, true);
+      this.ui.stage.addEventListener('pointermove', event => {
+        if (this.connecting) { this.previewPoint = this.clientPoint(event.clientX, event.clientY); this.drawLines(); }
       });
       this.keyHandler = event => {
         if (!this.ready || this.host.hidden || this.host.closest('[hidden]')) return;
@@ -2047,9 +2193,12 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
           event.preventDefault(); this.download();
         } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'z' && !editing) {
           event.preventDefault(); event.shiftKey ? this.redo() : this.undo();
-        } else if (event.key === 'Delete' && this.selected && !editing) {
-          event.preventDefault(); this.remove(this.selected);
-        } else if (event.key === 'Escape') this.select(null);
+        } else if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'd' && this.selected && !editing) {
+          event.preventDefault(); this.duplicate(this.selected);
+        } else if (event.key === 'Delete' && !editing) {
+          if (this.selectedLine) { event.preventDefault(); this.removeLine(); }
+          else if (this.selected) { event.preventDefault(); this.remove(this.selected); }
+        } else if (event.key === 'Escape') { this.cancelConnect(); this.select(null); }
       };
       document.addEventListener('keydown', this.keyHandler);
       this.resizeObserver = new ResizeObserver(() => {
@@ -2086,9 +2235,10 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
         this.data.notes.forEach(note => {
           if (!note.rootId) note.rootId = this.rootId();
           if (!note.diagramId) note.diagramId = this.data.diagramId;
+          if (!note.scopeId) note.scopeId = note.rootId.replace(/_plane$/, '');
         });
         this.ui.error.hidden = true;
-        for (const name of ['add', 'minus', 'plus', 'fit', 'export']) this.ui[name].disabled = false;
+        for (const name of ['add', 'minus', 'plus', 'fit', 'export', 'export-bpmn']) this.ui[name].disabled = false;
         this.drawNotes();
         if (this.data.viewbox) this.canvas.viewbox(this.data.viewbox);
         else this.fit();
@@ -2110,8 +2260,9 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     }
     changed() {
       this.dirty = true;
-      this.ui.message.textContent = 'Есть изменения · скачайте HTML, чтобы сохранить';
+      this.ui.message.textContent = 'Есть изменения · скачайте HTML или BPMN, чтобы сохранить';
       this.updateControls();
+      this.drawLines();
     }
     message(text) { this.ui.message.textContent = text; }
     updateControls() {
@@ -2120,12 +2271,20 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
       for (const key of ['width', 'height', 'color']) this.ui[key].value = values[key];
       this.ui.undo.disabled = !this.history.length;
       this.ui.redo.disabled = !this.future.length;
+      this.ui.duplicate.disabled = !note;
+      this.ui.connect.disabled = !note;
+      this.ui.connect.classList.toggle('is-active', !!this.connecting);
+      this.ui['remove-line'].disabled = !this.selectedLine;
+      for (const control of this.ui.format.querySelectorAll('button, select, input')) control.disabled = !note;
       this.ui.count.textContent = 'Карточек: ' + this.visibleNotes().length + (this.data.notes.length !== this.visibleNotes().length ? ' · всего ' + this.data.notes.length : '');
     }
     select(id) {
+      if (id !== this.selected) this.selectionRange = null;
       this.selected = id;
+      this.selectedLine = null;
       for (const [key, node] of this.nodes) node.classList.toggle('is-selected', key === id);
       this.updateControls();
+      this.drawLines();
     }
     noteStyle(note, node) {
       node.style.left = note.x + 'px'; node.style.top = note.y + 'px';
@@ -2137,28 +2296,76 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
       this.ui.notes.replaceChildren();
       this.visibleNotes().forEach(note => this.drawNote(note));
       this.updateControls();
+      this.drawLines();
+    }
+    rememberSelection() {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const node = this.nodes.get(this.selected)?.querySelector('.bpmn-note-editor');
+      if (node && node.contains(range.commonAncestorContainer)) {
+        this.selectionRange = { noteId: this.selected, range: range.cloneRange() };
+        for (const button of this.ui.format.querySelectorAll('[data-command]')) {
+          button.setAttribute('aria-pressed', String(document.queryCommandState(button.dataset.command)));
+        }
+      }
+    }
+    commitEditor(note, editor) {
+      note.html = sanitizeHtml(editor.innerHTML);
+      note.text = plainText(note.html);
+      this.changed();
+    }
+    format(command, value) {
+      const note = this.data.notes.find(n => n.id === this.selected);
+      const editor = this.nodes.get(this.selected)?.querySelector('.bpmn-note-editor');
+      if (!note || !editor) return;
+      const saved = this.selectionRange;
+      this.checkpoint();
+      editor.focus({ preventScroll: true });
+      const selection = window.getSelection(); selection.removeAllRanges();
+      if (saved?.noteId === note.id && editor.contains(saved.range.commonAncestorContainer)) selection.addRange(saved.range);
+      else { const range = document.createRange(); range.selectNodeContents(editor); selection.addRange(range); }
+      document.execCommand('styleWithCSS', false, true);
+      if (command === 'fontSize') {
+        document.execCommand('fontSize', false, '7');
+        for (const el of editor.querySelectorAll('font[size="7"], [style*="xxx-large"]')) { el.style.fontSize = clamp(value, 10, 48) + 'px'; el.removeAttribute('size'); }
+      } else document.execCommand(command, false, value || null);
+      this.commitEditor(note, editor);
+      this.rememberSelection();
     }
     drawNote(note) {
       const node = document.createElement('article');
       node.className = 'bpmn-note';
       node.dataset.noteId = note.id;
       node.setAttribute('aria-label', 'Комментарий');
-      node.innerHTML = '<div class="bpmn-note-head" tabindex="0" title="Перетащите заголовок; стрелки — переместить"><span>⠿ Комментарий</span><button type="button" aria-label="Удалить карточку" title="Удалить карточку">×</button></div><textarea placeholder="Ваш комментарий…" aria-label="Текст комментария" spellcheck="true"></textarea><button type="button" class="bpmn-note-resize" aria-label="Изменить размер карточки" title="Потяните за угол; стрелки — изменить размер"></button>';
+      node.innerHTML = '<div class="bpmn-note-head" tabindex="0" title="Перетащите заголовок; стрелки — переместить"><span>⠿ Комментарий</span><button type="button" class="bpmn-note-link" aria-label="Провести линию от карточки" title="Провести линию: нажмите здесь, затем укажите элемент, карточку или точку">↗</button><button type="button" class="bpmn-note-duplicate" aria-label="Дублировать карточку" title="Дублировать карточку">⧉</button><button type="button" class="bpmn-note-delete" aria-label="Удалить карточку" title="Удалить карточку">×</button></div><div class="bpmn-note-editor" contenteditable="true" role="textbox" aria-multiline="true" data-placeholder="Ваш комментарий…" aria-label="Текст комментария" spellcheck="true"></div><button type="button" class="bpmn-note-resize" aria-label="Изменить размер карточки" title="Потяните за угол; стрелки — изменить размер"></button>';
       this.noteStyle(note, node);
       const head = node.querySelector('.bpmn-note-head');
-      const area = node.querySelector('textarea');
+      const area = node.querySelector('.bpmn-note-editor');
       const resize = node.querySelector('.bpmn-note-resize');
-      area.value = note.text;
+      area.innerHTML = note.html || safeHtml(note.text).replace(/\n/g, '<br>');
       area.addEventListener('focus', () => { this.select(note.id); this.checkpoint(); });
-      area.addEventListener('input', () => { note.text = area.value; this.changed(); });
+      area.addEventListener('input', () => this.commitEditor(note, area));
+      area.addEventListener('paste', event => {
+        event.preventDefault();
+        const html = event.clipboardData.getData('text/html') || safeHtml(event.clipboardData.getData('text/plain')).replace(/\n/g, '<br>');
+        this.checkpoint(); document.execCommand('insertHTML', false, sanitizeHtml(html)); this.commitEditor(note, area);
+      });
+      area.addEventListener('drop', event => {
+        if (event.dataTransfer.files.length) return;
+        event.preventDefault();
+        this.checkpoint(); document.execCommand('insertText', false, event.dataTransfer.getData('text/plain')); this.commitEditor(note, area);
+      });
       area.addEventListener('blur', () => {
         if (this.history.at(-1) === this.snapshot()) { this.history.pop(); this.updateControls(); }
       });
-      node.addEventListener('pointerdown', event => { this.select(note.id); event.stopPropagation(); });
+      node.addEventListener('pointerdown', event => { if (!this.connecting) this.select(note.id); else event.preventDefault(); event.stopPropagation(); });
       node.addEventListener('mousedown', event => event.stopPropagation());
       node.addEventListener('dblclick', event => event.stopPropagation());
       node.addEventListener('wheel', event => event.stopPropagation());
-      head.querySelector('button').onclick = () => this.remove(note.id);
+      head.querySelector('.bpmn-note-delete').onclick = () => this.remove(note.id);
+      head.querySelector('.bpmn-note-duplicate').onclick = () => this.duplicate(note.id);
+      head.querySelector('.bpmn-note-link').onclick = event => { event.stopPropagation(); this.beginConnect(note.id); };
       head.addEventListener('pointerdown', event => { if (!event.target.closest('button')) this.pointer(event, note, node, false); });
       resize.addEventListener('pointerdown', event => this.pointer(event, note, node, true));
       const arrow = (event, resizing) => {
@@ -2182,7 +2389,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     }
 
     pointer(event, note, node, resizing) {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || this.connecting) return;
       event.preventDefault(); event.stopPropagation();
       this.select(note.id);
       const target = event.currentTarget;
@@ -2213,20 +2420,31 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     }
     add(position) {
       if (!this.ready) return;
+      this.cancelConnect();
       this.checkpoint();
       const vb = this.canvas.viewbox();
       const note = {
-        id: 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2),
+        id: uid('note'), html: '', links: [], scopeId: this.canvas.getRootElement()?.businessObject?.id || this.rootId().replace(/_plane$/, ''),
         text: '', ...this.defaults, rootId: this.rootId(), diagramId: this.data.diagramId,
         x: Math.round(position?.x ?? vb.x + vb.width / 2 - this.defaults.width / 2),
         y: Math.round(position?.y ?? vb.y + vb.height / 2 - this.defaults.height / 2)
       };
       this.data.notes.push(note); this.drawNote(note); this.select(note.id); this.changed();
-      this.nodes.get(note.id).querySelector('textarea').focus({ preventScroll: true });
+      this.nodes.get(note.id).querySelector('.bpmn-note-editor').focus({ preventScroll: true });
+    }
+    duplicate(id) {
+      const source = this.data.notes.find(n => n.id === id);
+      if (!source) return;
+      this.cancelConnect(); this.checkpoint();
+      const note = { ...structuredClone(source), id: uid('note'), x: source.x + 32, y: source.y + 32 };
+      note.links.forEach(link => { link.id = uid('link'); });
+      this.data.notes.push(note); this.drawNote(note); this.select(note.id); this.changed();
+      this.nodes.get(note.id).querySelector('.bpmn-note-head').focus({ preventScroll: true });
     }
     remove(id) {
-      this.checkpoint(); this.data.notes = this.data.notes.filter(note => note.id !== id);
-      this.selected = null; this.drawNotes(); this.changed();
+      this.cancelConnect(); this.checkpoint(); this.data.notes = this.data.notes.filter(note => note.id !== id);
+      for (const note of this.data.notes) note.links = note.links.filter(link => link.kind !== 'note' || link.targetId !== id);
+      this.selected = null; this.selectedLine = null; this.drawNotes(); this.changed();
     }
     changeProperty(key) {
       const value = key === 'color' ? this.ui.color.value : Math.round(clamp(this.ui[key].value, key === 'width' ? 160 : 100, key === 'width' ? 1600 : 1200, this.defaults[key]));
@@ -2236,16 +2454,98 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     }
     undo() {
       if (!this.history.length) return;
+      this.cancelConnect(); this.selectedLine = null;
       this.future.push(this.snapshot()); this.data.notes = JSON.parse(this.history.pop()); this.selected = null; this.drawNotes(); this.changed();
     }
     redo() {
       if (!this.future.length) return;
+      this.cancelConnect(); this.selectedLine = null;
       this.history.push(this.snapshot()); this.data.notes = JSON.parse(this.future.pop()); this.selected = null; this.drawNotes(); this.changed();
+    }
+    clientPoint(x, y) {
+      const rect = this.ui.stage.getBoundingClientRect(), vb = this.canvas.viewbox();
+      return { x: vb.x + (x - rect.left) / vb.scale, y: vb.y + (y - rect.top) / vb.scale };
+    }
+    beginConnect(id) {
+      if (!this.ready || !this.data.notes.some(note => note.id === id)) return;
+      if (this.connecting === id) { this.cancelConnect(); return; }
+      this.select(id); this.connecting = id; this.previewPoint = null;
+      this.host.classList.add('bpmn-connecting');
+      this.message('Укажите конец линии: элемент схемы, другая карточка или свободная точка. Escape — отмена.');
+      this.updateControls(); this.drawLines();
+    }
+    cancelConnect() {
+      const wasConnecting = !!this.connecting;
+      this.connecting = null; this.previewPoint = null;
+      this.host.classList.remove('bpmn-connecting');
+      if (wasConnecting) this.message(this.dirty ? 'Есть изменения · скачайте HTML или BPMN, чтобы сохранить' : '');
+      this.updateControls(); this.drawLines();
+    }
+    finishConnect(event) {
+      const source = this.data.notes.find(note => note.id === this.connecting);
+      if (!source) { this.cancelConnect(); return; }
+      const point = this.clientPoint(event.clientX, event.clientY);
+      const targetNoteId = event.target.closest('.bpmn-note')?.dataset.noteId;
+      if (targetNoteId === source.id) return;
+      const elementId = event.target.closest('.djs-element')?.getAttribute('data-element-id');
+      const targetElement = this.viewer.get('elementRegistry').get(elementId);
+      const target = targetElement?.labelTarget || targetElement;
+      const link = { id: uid('link'), kind: 'point', targetId: '', x: point.x, y: point.y };
+      if (targetNoteId) { link.kind = 'note'; link.targetId = targetNoteId; }
+      else if (target && target.id !== this.rootId()) { link.kind = 'element'; link.targetId = target.id; }
+      this.checkpoint(); source.links.push(link); this.cancelConnect(); this.select(source.id); this.changed();
+    }
+    linePoints(note, link, resolveElement) {
+      const center = { x: note.x + note.width / 2, y: note.y + note.height / 2 };
+      const target = link.kind === 'note' ? this.data.notes.find(n => n.id === link.targetId && n.diagramId === note.diagramId && n.rootId === note.rootId)
+        : link.kind === 'element' ? (resolveElement ? resolveElement(link.targetId) : this.viewer.get('elementRegistry').get(link.targetId)) : null;
+      let end = { x: link.x, y: link.y };
+      if (target && Number.isFinite(target.width)) end = rectPoint(target, center);
+      return [rectPoint(note, end), end];
+    }
+    drawLines() {
+      if (!this.ready || !this.ui.lines) return;
+      const group = this.ui.lines.querySelector('g'); group.replaceChildren();
+      const svgNS = 'http://www.w3.org/2000/svg';
+      const path = (points, className) => {
+        const el = document.createElementNS(svgNS, 'path');
+        el.setAttribute('d', points.map((point, index) => (index ? 'L ' : 'M ') + point.x + ' ' + point.y).join(' '));
+        el.setAttribute('class', className); group.append(el); return el;
+      };
+      for (const note of this.visibleNotes()) for (const link of note.links) {
+        const points = this.linePoints(note, link);
+        const selected = this.selectedLine?.noteId === note.id && this.selectedLine?.linkId === link.id;
+        path(points, 'bpmn-line' + (selected ? ' is-selected' : ''));
+        const hit = path(points, 'bpmn-line-hit');
+        hit.setAttribute('tabindex', '0'); hit.setAttribute('role', 'button'); hit.setAttribute('aria-label', 'Линия комментария. Delete — удалить.');
+        const title = document.createElementNS(svgNS, 'title'); title.textContent = 'Выбрать линию · двойной щелчок — удалить'; hit.append(title);
+        hit.addEventListener('pointerdown', event => event.stopPropagation());
+        hit.addEventListener('click', event => {
+          event.stopPropagation(); this.selectedLine = { noteId: note.id, linkId: link.id }; this.updateControls();
+          for (const line of group.querySelectorAll('.bpmn-line')) line.classList.remove('is-selected');
+          hit.previousElementSibling.classList.add('is-selected');
+        });
+        hit.addEventListener('dblclick', event => { event.stopPropagation(); this.removeLine(note.id, link.id); });
+        hit.addEventListener('keydown', event => {
+          if (['Delete', 'Backspace'].includes(event.key)) { event.preventDefault(); event.stopPropagation(); this.removeLine(note.id, link.id); }
+        });
+        const dot = document.createElementNS(svgNS, 'circle'); dot.setAttribute('cx', points[1].x); dot.setAttribute('cy', points[1].y); dot.setAttribute('r', '3'); dot.setAttribute('class', 'bpmn-line-dot'); group.append(dot);
+      }
+      if (this.connecting && this.previewPoint) {
+        const source = this.data.notes.find(note => note.id === this.connecting);
+        if (source) path([rectPoint(source, this.previewPoint), this.previewPoint], 'bpmn-line bpmn-line-preview');
+      }
+    }
+    removeLine(noteId = this.selectedLine?.noteId, linkId = this.selectedLine?.linkId) {
+      const note = this.data.notes.find(n => n.id === noteId);
+      if (!note || !note.links.some(link => link.id === linkId)) return;
+      this.checkpoint(); note.links = note.links.filter(link => link.id !== linkId); this.selectedLine = null; this.changed();
     }
     syncView() {
       if (!this.ready || this.destroyed || !this.ui.stage.clientWidth) return;
       const vb = this.canvas.viewbox();
       this.ui.notes.style.transform = `translate(${-vb.x * vb.scale}px, ${-vb.y * vb.scale}px) scale(${vb.scale})`;
+      this.ui.lines.querySelector('g').setAttribute('transform', `translate(${-vb.x * vb.scale}, ${-vb.y * vb.scale}) scale(${vb.scale})`);
       this.ui.zoom.textContent = Math.round(vb.scale * 100) + '%';
       const root = this.rootId();
       if (root !== this.lastRoot) { this.lastRoot = root; this.selected = null; this.drawNotes(); }
@@ -2254,7 +2554,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     fit() {
       if (!this.ready) return;
       const bounds = this.canvas.viewbox().inner;
-      const items = [{ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }, ...this.visibleNotes()];
+      const items = [{ x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }, ...this.visibleNotes(), ...this.visibleNotes().flatMap(note => note.links.filter(link => link.kind === 'point').map(link => ({ x: link.x, y: link.y, width: 0, height: 0 })))];
       const minX = Math.min(...items.map(n => n.x)) - 40;
       const minY = Math.min(...items.map(n => n.y)) - 40;
       const maxX = Math.max(...items.map(n => n.x + n.width)) + 40;
@@ -2264,6 +2564,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     }
     async openDiagram(id) {
       if (!this.ready) return;
+      this.cancelConnect(); this.selectedLine = null;
       try {
         const diagram = this.viewer.getDefinitions().diagrams.find(d => d.id === id);
         if (!diagram) return;
@@ -2278,6 +2579,99 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
     payload() {
       const vb = this.canvas.viewbox();
       return { ...this.data, rootId: this.rootId(), viewbox: { x: vb.x, y: vb.y, width: vb.width, height: vb.height } };
+    }
+    bpmnXml() {
+      const doc = new DOMParser().parseFromString(this.data.xml, 'application/xml');
+      if (doc.querySelector('parsererror')) throw new Error('Не удалось прочитать исходный XML.');
+      const root = doc.documentElement;
+      const xmlns = 'http://www.w3.org/2000/xmlns/';
+      const prefixes = {};
+      for (const [prefix, uri] of Object.entries(NS)) {
+        let chosen = prefix;
+        while (root.lookupNamespaceURI(chosen) && root.lookupNamespaceURI(chosen) !== uri) chosen += '_';
+        root.setAttributeNS(xmlns, 'xmlns:' + chosen, uri); prefixes[prefix] = chosen;
+      }
+      const elements = new Map([...doc.querySelectorAll('[id]')].map(el => [el.getAttribute('id'), el]));
+      const allocate = base => {
+        let id = base.replace(/[^\w-]/g, '_');
+        if (!/^[A-Za-z_]/.test(id)) id = '_' + id;
+        while (elements.has(id)) id += '_';
+        elements.set(id, null); return id;
+      };
+      const make = (ns, name, attrs = {}) => {
+        const node = doc.createElementNS(NS[ns], prefixes[ns] + ':' + name);
+        for (const [key, value] of Object.entries(attrs)) node.setAttribute(key, String(value));
+        return node;
+      };
+      const extension = (element, kind, data = '') => {
+        const container = make('bpmn', 'extensionElements');
+        const marker = make('vc', kind, { version: '1', encoding: 'base64' });
+        marker.textContent = data; container.append(marker); element.append(container);
+      };
+      const insertArtifact = (scope, node) => {
+        const afterArtifacts = new Set(scope.localName === 'collaboration' || scope.localName === 'choreography'
+          ? ['conversation', 'subConversation', 'callConversation', 'conversationAssociation', 'participantAssociation', 'messageFlowAssociation', 'correlationKey', 'choreographyRef', 'conversationLink']
+          : ['resourceRole', 'performer', 'humanPerformer', 'potentialOwner', 'correlationSubscription', 'supports']);
+        scope.insertBefore(node, [...scope.children].find(child => child.namespaceURI === NS.bpmn && afterArtifacts.has(child.localName)) || null);
+      };
+      const contexts = new Map();
+      const noteIds = new Map();
+      const fill = { yellow: '#fff3b8', blue: '#dfefff', green: '#e0f3dc', pink: '#ffe2ed' };
+      const addAnnotation = (id, note, context, kind, text) => {
+        const annotation = make('bpmn', 'textAnnotation', { id, textFormat: 'text/plain' });
+        extension(annotation, kind, kind === 'card' ? encode(JSON.stringify(note)) : '');
+        const content = make('bpmn', 'text'); content.textContent = text; annotation.append(content);
+        insertArtifact(context.scope, annotation); elements.set(id, annotation);
+        const shape = make('bpmndi', 'BPMNShape', { id: allocate(id + '_di'), bpmnElement: id });
+        if (kind === 'card') {
+          shape.setAttributeNS(NS.bioc, prefixes.bioc + ':fill', fill[note.color]);
+          shape.setAttributeNS(NS.bioc, prefixes.bioc + ':stroke', '#6f795e');
+        }
+        shape.append(make('dc', 'Bounds', { x: note.x, y: note.y, width: note.width, height: note.height }));
+        context.plane.append(shape);
+      };
+      for (const note of this.data.notes) {
+        const diagram = elements.get(note.diagramId);
+        const plane = diagram && [...diagram.children].find(el => el.namespaceURI === NS.bpmndi && el.localName === 'BPMNPlane');
+        const scope = elements.get(note.scopeId || note.rootId.replace(/_plane$/, '')) || elements.get(plane?.getAttribute('bpmnElement'));
+        if (!plane || !scope || !['process', 'subProcess', 'adHocSubProcess', 'transaction', 'collaboration', 'choreography', 'subChoreography'].includes(scope.localName)) throw new Error('Не удалось определить контейнер BPMN для одной из карточек.');
+        const context = { plane, scope }; contexts.set(note.id, context);
+        const id = allocate('ViewerCard_' + note.id); noteIds.set(note.id, id);
+        addAnnotation(id, note, context, 'card', note.text);
+      }
+      for (const note of this.data.notes) for (const link of note.links) {
+        const context = contexts.get(note.id);
+        let targetId = link.kind === 'note' ? noteIds.get(link.targetId) : link.kind === 'element' && elements.has(link.targetId) ? link.targetId : null;
+        if (!targetId) {
+          targetId = allocate('ViewerAnchor_' + link.id);
+          addAnnotation(targetId, { x: link.x, y: link.y, width: 1, height: 1 }, context, 'anchor', '');
+        }
+        const associationId = allocate('ViewerLine_' + link.id);
+        const association = make('bpmn', 'association', { id: associationId, associationDirection: 'None', sourceRef: noteIds.get(note.id), targetRef: targetId });
+        extension(association, 'line'); insertArtifact(context.scope, association);
+        const edge = make('bpmndi', 'BPMNEdge', { id: allocate(associationId + '_di'), bpmnElement: associationId });
+        const resolve = id => {
+          const shape = [...context.plane.getElementsByTagNameNS(NS.bpmndi, 'BPMNShape')].find(el => el.getAttribute('bpmnElement') === id);
+          const bounds = shape?.getElementsByTagNameNS(NS.dc, 'Bounds')[0];
+          return bounds ? Object.fromEntries(['x', 'y', 'width', 'height'].map(key => [key, Number(bounds.getAttribute(key))])) : null;
+        };
+        for (const point of this.linePoints(note, link, resolve)) edge.append(make('di', 'waypoint', { x: point.x, y: point.y }));
+        context.plane.append(edge);
+      }
+      return new XMLSerializer().serializeToString(doc);
+    }
+    saveFile(content, type, suffix) {
+      const url = URL.createObjectURL(new Blob([content], { type }));
+      const link = document.createElement('a'); link.href = url;
+      link.download = this.data.name.replace(/(?:-comments)?\.(bpmn2?|xml|html?)$/i, '').replace(/[\\/:*?"<>|]/g, '_') + '-comments.' + suffix;
+      document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
+    }
+    downloadBpmn() {
+      if (!this.ready) return;
+      try {
+        this.saveFile(this.bpmnXml(), 'application/xml;charset=utf-8', 'bpmn');
+        this.dirty = false; this.message('BPMN скачан · карточки, линии и форматирование включены');
+      } catch (error) { this.message('Не удалось скачать BPMN: ' + error.message); }
     }
     async download() {
       if (!this.ready || this.exporting) return;
@@ -2294,21 +2688,18 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
         const scriptTags = scripts.map((source, i) => '<script id="' + (i ? 'bpmn-workspace-script' : 'bpmn-library') + '">' + source + '<' + '/script>').join('\n');
         const license = document.getElementById('bpmn-license').outerHTML;
         const html = '<!doctype html>\n<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="' + safeHtml(policy) + '"><title>' + safeHtml(this.data.name) + ' — комментарии BPMN</title>' + styles + '</head><body class="bpmn-portable"><header class="bpmn-portable-header"><strong id="portableTitle"></strong><span>BPMN · схема и комментарии · офлайн</span></header><main id="portableWorkspace"></main><script id="bpmn-data" type="application/octet-stream">' + encode(JSON.stringify(this.payload())) + '<' + '/script>' + license + scriptTags + '</body></html>';
-        const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
-        const link = document.createElement('a'); link.href = url;
-        link.download = this.data.name.replace(/\.(bpmn2?|xml|html?)$/i, '').replace(/[\\/:*?"<>|]/g, '_') + '-comments.html';
-        document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 30000);
-        this.dirty = false; this.message('HTML скачан · схема и все карточки включены');
+        this.saveFile(html, 'text/html;charset=utf-8', 'html');
+        this.dirty = false; this.message('HTML скачан · схема, карточки и линии включены');
       } catch (error) { this.message('Не удалось скачать HTML: ' + error.message); }
       finally { this.exporting = false; this.ui.export.disabled = false; }
     }
     destroy() {
       this.destroyed = true; this.ready = false;
-      this.resizeObserver.disconnect(); document.removeEventListener('keydown', this.keyHandler);
+      this.resizeObserver.disconnect(); document.removeEventListener('keydown', this.keyHandler); document.removeEventListener('selectionchange', this.selectionHandler);
       this.viewer.destroy(); instances.delete(this); this.host.remove();
     }
   }
-  window.BpmnComments = { Workspace, readPayload };
+  window.BpmnComments = { Workspace, readPayload, readBpmn, sanitizeHtml };
   window.addEventListener('beforeunload', event => {
     if ([...instances].some(instance => instance.dirty)) { event.preventDefault(); event.returnValue = ''; }
   });
@@ -2507,7 +2898,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
         }
         els.fileName.textContent = tab.file.name;
         if (tab.isBpmn) {
-          els.fileDetails.textContent = `${formatBytes(tab.file.size)} · BPMN 2.0 · карточки комментариев · экспорт HTML`;
+          els.fileDetails.textContent = `${formatBytes(tab.file.size)} · BPMN 2.0 · комментарии и линии · экспорт HTML / BPMN`;
           return;
         }
         const encodingText = tab.encoding === "auto"
@@ -2603,7 +2994,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
         const index = tabs.findIndex((tab) => tab.id === id);
         if (index < 0) return;
         const closing = tabs[index];
-        if (closing.bpmnWorkspace?.dirty && !window.confirm("В карточках есть несохранённые изменения. Закрыть вкладку? Чтобы сохранить их, нажмите «Отмена», затем «Скачать HTML».")) return;
+        if (closing.bpmnWorkspace?.dirty && !window.confirm("В карточках есть несохранённые изменения. Закрыть вкладку? Чтобы сохранить их, нажмите «Отмена», затем «Скачать HTML» или «Скачать BPMN».")) return;
         closing.bpmnWorkspace?.destroy();
         const wasActive = activeId === id;
         if (wasActive) activeId = null;
@@ -3120,7 +3511,7 @@ function(e){const t=ke('<a href="http://bpmn.io" target="_blank" class="bjs-powe
               const xml = detectAndDecode(buffer).text;
               tab.bpmnData = /\.html?$/i.test(file.name)
                 ? BpmnComments.readPayload(xml)
-                : { xml, name: file.name };
+                : BpmnComments.readBpmn(xml, file.name);
               tab.loaded = true;
             }
             tabs.push(tab);
