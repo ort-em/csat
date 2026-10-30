@@ -38,12 +38,15 @@
     .screen-arrow:hover:not(:disabled) { background:#3767b4; }
     .screen-top .summary { font-size:14px; line-height:20px; font-weight:600; color:#e0eaff; text-align:right; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
     .screen { flex:1; min-height:0; padding:8px; overflow:hidden; }
+    .screen.oversized { overflow-y:auto; }
+    .oversize { width:100%; }
+    .scroll-hint { font-size:12px; line-height:16px; font-weight:600; color:#fff; }
+    .scroll-hint[hidden] { display:none; }
     .grid { height:100%; display:grid; grid-template-columns:repeat(var(--columns),minmax(0,1fr)); gap:8px; align-items:start; }
     .column { min-width:0; display:flex; flex-direction:column; gap:8px; }
     .card { flex:none; min-width:0; padding:12px; background:var(--paper); border:2px solid #172554; border-radius:8px; box-shadow:0 1px 0 rgba(0,0,0,.12); }
-    .card-head { display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; column-gap:8px; row-gap:0; margin-bottom:8px; }
+    .card-head { display:flex; flex-direction:column; gap:0; margin-bottom:8px; }
     .card-id { color:#123b86; font-size:16px; line-height:24px; font-weight:700; overflow-wrap:anywhere; }
-    .card-part { color:#334155; font-size:12px; line-height:16px; font-weight:700; }
     .card-text { white-space:pre-wrap; overflow-wrap:anywhere; font-size:var(--dialog-font); line-height:1.35; color:#101827; font-weight:500; tab-size:4; }
     .footer { flex:none; display:flex; align-items:center; justify-content:center; gap:8px; background:#fff; border-top:1px solid #64748b; padding:8px 16px; }
     .footer .page-label { font-size:14px; line-height:20px; font-weight:700; }
@@ -75,8 +78,8 @@
     </div>
   </header>
   <div id="message" class="message" role="status" hidden></div>
-  <div class="screen-top"><div class="screen-nav"><button id="top-prev" class="screen-arrow" type="button" aria-label="Предыдущий экран" disabled>‹</button><span id="screen-label">Экран 0 / 0</span><button id="top-next" class="screen-arrow" type="button" aria-label="Следующий экран" disabled>›</button></div><span id="summary" class="summary">Файл не загружен</span></div>
-  <main id="screen" class="screen"><div class="empty"><div id="drop" class="drop" tabindex="0" role="button" aria-label="Загрузить файл XLSX"><h2>Загрузите файл с диалогами</h2><p>Перетащите XLSX сюда или выберите файл. Страница прочитает таблицу в браузере и разложит диалоги по экранам.</p><button id="empty-load" class="btn primary" type="button">Выбрать файл</button><p class="small">Нужны столбцы «Во. Номер вопроса», «Обр. Текст чата» и «Обр. Текст звонка». Файл обрабатывается на вашем устройстве.</p></div></div></main>
+  <div class="screen-top"><div class="screen-nav"><button id="top-prev" class="screen-arrow" type="button" aria-label="Предыдущий экран" disabled>‹</button><span id="screen-label">Экран 0 / 0</span><button id="top-next" class="screen-arrow" type="button" aria-label="Следующий экран" disabled>›</button><span id="scroll-hint" class="scroll-hint" hidden>↓ Прокрутите диалог</span></div><span id="summary" class="summary">Файл не загружен</span></div>
+  <main id="screen" class="screen"><div class="empty"><div id="drop" class="drop" tabindex="0" role="button" aria-label="Загрузить файл XLSX"><h2>Загрузите файл с диалогами</h2><p>Перетащите XLSX сюда или выберите файл. Страница прочитает таблицу в браузере и разложит диалоги по экранам.</p><button id="empty-load" class="btn primary" type="button">Выбрать файл</button><p class="small">Нужны столбцы «Во. Номер вопроса», «Во. ID вопроса», «Обр. Текст чата» и «Обр. Текст звонка». Файл обрабатывается на вашем устройстве.</p></div></div></main>
   <nav class="footer" aria-label="Навигация по экранам"><button id="prev" class="btn" type="button" disabled>← Назад</button><span class="page-label">Экран</span><input id="page" class="field number" type="number" min="1" value="1" aria-label="Номер экрана"><span id="page-total" class="page-label">из 0</span><button id="next" class="btn primary" type="button" disabled>Далее →</button><span class="hint">← → экраны · F режим съёмки · Esc выход</span></nav>
 </div>
 <div id="measure" class="measure" aria-hidden="true"></div>
@@ -109,7 +112,7 @@ THE SOFTWARE. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const els = {file:$('file'),chat:$('chat'),call:$('call'),font:$('font'),columns:$('columns'),capture:$('capture'),message:$('message'),screen:$('screen'),label:$('screen-label'),summary:$('summary'),page:$('page'),total:$('page-total'),prev:$('prev'),next:$('next'),topPrev:$('top-prev'),topNext:$('top-next'),measure:$('measure')};
+  const els = {file:$('file'),chat:$('chat'),call:$('call'),font:$('font'),columns:$('columns'),capture:$('capture'),message:$('message'),screen:$('screen'),label:$('screen-label'),scrollHint:$('scroll-hint'),summary:$('summary'),page:$('page'),total:$('page-total'),prev:$('prev'),next:$('next'),topPrev:$('top-prev'),topNext:$('top-next'),measure:$('measure')};
   const state = {records:[],fileName:'',mode:'chat',pages:[],page:0,building:0,numericIds:false};
   const decoder = new TextDecoder();
   function tell(message,error=false) { els.message.textContent=message; els.message.classList.toggle('error',error); els.message.hidden=!message; }
@@ -170,24 +173,26 @@ THE SOFTWARE. */
       for (const [col,value] of map) {
         const h=norm(value);
         if (h==='во номер вопроса') found.id=col;
+        if (h==='во id вопроса' || h==='во ид вопроса') found.questionId=col;
         if (h==='обр текст чата') found.chat=col;
         if (h==='обр текст звонка') found.call=col;
       }
-      if (found.id!==undefined && found.chat!==undefined && found.call!==undefined) { heads=found; start=r+1; break; }
+      if (found.id!==undefined && found.questionId!==undefined && found.chat!==undefined && found.call!==undefined) { heads=found; start=r+1; break; }
     }
     if (!heads) return null;
     const records=[]; let numericIds=false;
     for (let r=start;r<rows.length;r++) {
-      const values={id:'',chat:'',call:''};
+      const values={id:'',questionId:'',chat:'',call:''};
       for (const c of localNodes(rows[r],'c')) {
         const col=columnIndex(c.getAttribute('r')||'');
-        for (const field of ['id','chat','call']) if (col===heads[field]) {
+        for (const field of ['id','questionId','chat','call']) if (col===heads[field]) {
           values[field]=cellText(c,strings);
-          if (field==='id' && c.getAttribute('t')!=='s' && c.getAttribute('t')!=='inlineStr' && c.getAttribute('t')!=='str') numericIds=true;
+          if ((field==='id'||field==='questionId') && c.getAttribute('t')!=='s' && c.getAttribute('t')!=='inlineStr' && c.getAttribute('t')!=='str') numericIds=true;
         }
       }
       values.id=values.id.replace(/^['’]/,'').trim();
-      if (values.id||values.chat||values.call) records.push(values);
+      values.questionId=values.questionId.replace(/^['’]/,'').trim();
+      if (values.id||values.questionId||values.chat||values.call) records.push(values);
     }
     return {records,numericIds};
   }
@@ -210,41 +215,22 @@ THE SOFTWARE. */
       const sheet=await zip.read(path); if (!sheet) continue;
       const result=parseSheet(sheet,strings); if (result) return result;
     }
-    throw Error('Не найдены все три столбца. Проверьте названия: «Во. Номер вопроса», «Обр. Текст чата», «Обр. Текст звонка».');
+    throw Error('Не найдены все четыре столбца. Проверьте названия: «Во. Номер вопроса», «Во. ID вопроса», «Обр. Текст чата», «Обр. Текст звонка».');
   }
-  function makeCard(item,forMeasure=false) {
+  function makeCard(item) {
     const card=document.createElement('article'); card.className='card';
     const head=document.createElement('div'); head.className='card-head';
-    const id=document.createElement('span'); id.className='card-id'; id.textContent=item.id||'Без номера'; head.append(id);
-    if (item.parts>1 || forMeasure) { const part=document.createElement('span'); part.className='card-part'; part.textContent=forMeasure?'Часть 999/999':`Часть ${item.part}/${item.parts}`; head.append(part); }
+    const id=document.createElement('span'); id.className='card-id'; id.textContent='Номер вопроса: '+(item.id||'не указан'); head.append(id);
+    const questionId=document.createElement('span'); questionId.className='card-id'; questionId.textContent='ID вопроса: '+(item.questionId||'не указан'); head.append(questionId);
     const content=document.createElement('div'); content.className='card-text'; content.textContent=item.text;
     card.append(head,content); return card;
   }
-  function cardHeight(item,width) { const card=makeCard(item,true); card.style.width=width+'px'; els.measure.append(card); const h=Math.ceil(card.getBoundingClientRect().height); card.remove(); return h; }
-  function splitItem(record,limit,width) {
-    const text=record[state.mode], id=record.id;
-    if (!text) return [];
-    const result=[]; let at=0;
-    while (at<text.length) {
-      const remaining=text.slice(at);
-      if (cardHeight({id,text:remaining},width)<=limit) { result.push(remaining); break; }
-      let low=1,high=remaining.length,best=0;
-      while(low<=high) { const mid=(low+high)>>1; if(cardHeight({id,text:remaining.slice(0,mid)},width)<=limit) { best=mid; low=mid+1; } else high=mid-1; }
-      if (!best) throw Error('Экран слишком мал для карточки. Уменьшите размер текста или откройте окно шире.');
-      let cut=best;
-      if (best<remaining.length) {
-        const segment=remaining.slice(Math.floor(best*.75),best);
-        const last=Math.max(segment.lastIndexOf('\n'),segment.lastIndexOf(' '),segment.lastIndexOf('\t'));
-        if (last>=0) cut=Math.floor(best*.75)+last+1;
-      }
-      result.push(remaining.slice(0,cut)); at+=cut;
-    }
-    return result.map((part,i)=>({id,text:part,part:i+1,parts:result.length,source:record}));
-  }
+  function cardHeight(item,width) { const card=makeCard(item); card.style.width=width+'px'; els.measure.append(card); const h=Math.ceil(card.getBoundingClientRect().height); card.remove(); return h; }
   function columnCount(width) { const selected=els.columns.value; return selected==='auto'?Math.max(1,Math.min(3,Math.floor((width+8)/430))):Math.max(1,Math.min(4,Number(selected),Math.floor((width+8)/260))); }
   function addToPages(pages,item,height,columns,limit) {
     let chosen=null,least=Infinity;
     for (let p=0;p<pages.length;p++) for(let c=0;c<columns;c++) {
+      if (pages[p].oversized) continue;
       const required=height+(pages[p].cols[c].length?8:0), free=limit-pages[p].used[c];
       if (required<=free && free-required<least) { chosen=[p,c]; least=free-required; }
     }
@@ -262,13 +248,8 @@ THE SOFTWARE. */
     document.documentElement.style.setProperty('--dialog-font',els.font.value+'px');
     els.measure.style.width=width+'px';
     const selected=state.records.filter(r=>r[state.mode]);
-    const sorted=selected.slice().sort((a,b)=>b[state.mode].length-a[state.mode].length);
-    const items=[];
+    const items=selected.map(r=>({id:r.id,questionId:r.questionId,text:r[state.mode]}));
     try {
-      for (let i=0;i<sorted.length;i++) {
-        items.push(...splitItem(sorted[i],limit,width));
-        if (i%70===69) { await new Promise(requestAnimationFrame); if(token!==state.building) return; }
-      }
       for (let i=0;i<items.length;i++) {
         items[i].height=cardHeight(items[i],width);
         if (i%100===99) { await new Promise(requestAnimationFrame); if(token!==state.building) return; }
@@ -276,7 +257,8 @@ THE SOFTWARE. */
       items.sort((a,b)=>b.height-a.height);
       const pages=[];
       for (let i=0;i<items.length;i++) {
-        addToPages(pages,items[i],items[i].height,cols,limit);
+        if (items[i].height>limit) pages.push({oversized:items[i],needsScroll:cardHeight(items[i],rect.width-16)>limit});
+        else addToPages(pages,items[i],items[i].height,cols,limit);
         if (i%100===99) { await new Promise(requestAnimationFrame); if(token!==state.building) return; }
       }
       if (token!==state.building) return;
@@ -285,7 +267,7 @@ THE SOFTWARE. */
       render();
     } catch(err) { if(token===state.building) { tell(err.message||String(err),true); renderEmpty('Не удалось разложить диалоги'); } }
   }
-  function renderEmpty(title) { els.screen.innerHTML=''; const box=document.createElement('div'); box.className='empty'; const text=document.createElement('h2'); text.textContent=title; box.append(text); els.screen.append(box); }
+  function renderEmpty(title) { els.scrollHint.hidden=true; els.screen.classList.remove('oversized'); els.screen.innerHTML=''; const box=document.createElement('div'); box.className='empty'; const text=document.createElement('h2'); text.textContent=title; box.append(text); els.screen.append(box); }
   function render() {
     const count=state.pages.length, page=state.pages[state.page];
     els.label.textContent=`Экран ${count?state.page+1:0} / ${count}`;
@@ -293,10 +275,14 @@ THE SOFTWARE. */
     els.prev.disabled=els.topPrev.disabled=!count||state.page===0; els.next.disabled=els.topNext.disabled=!count||state.page===count-1;
     els.summary.textContent=state.fileName?`${state.mode==='chat'?'Чат':'Звонок'} · ${state.records.filter(r=>r[state.mode]).length} диалогов · ${state.fileName}${state.numericIds?' · ⚠ числовые ID могли быть округлены Excel':''}`:'Файл не загружен';
     els.summary.title=state.numericIds?'Некоторые идентификаторы записаны в XLSX как числа. Excel мог округлить длинные номера. Для точного сохранения храните их как текст.':state.fileName;
+    els.scrollHint.hidden=!page?.needsScroll;
     if (!page) { renderEmpty(state.records.length?'В этом столбце нет диалогов':'Загрузите XLSX'); return; }
+    if (page.oversized) { const box=document.createElement('div'); box.className='oversize'; box.append(makeCard(page.oversized)); els.screen.classList.add('oversized'); els.screen.replaceChildren(box); els.screen.scrollTop=0; return; }
+    els.screen.classList.remove('oversized');
     const grid=document.createElement('div'); grid.className='grid'; grid.style.setProperty('--columns',page.cols.length);
     for(const items of page.cols) { const column=document.createElement('section'); column.className='column'; for(const item of items) column.append(makeCard(item)); grid.append(column); }
     els.screen.replaceChildren(grid);
+    els.screen.scrollTop=0;
   }
   async function openFile(file) {
     if (!file) return;
