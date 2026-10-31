@@ -26,6 +26,8 @@
     .segmented { display:flex; gap:4px; }
     .label { font-size:12px; line-height:16px; color:#334155; font-weight:700; }
     .setting { display:flex; align-items:center; gap:4px; }
+    .toggle { display:flex; align-items:center; gap:4px; color:#0f172a; font-size:14px; line-height:20px; font-weight:600; cursor:pointer; }
+    .toggle input { width:16px; height:16px; margin:0; accent-color:#173f8a; cursor:pointer; }
     .field { padding:0 8px; }
     .field.number { width:66px; text-align:center; }
     .file-input { display:none; }
@@ -74,6 +76,7 @@
       <div class="segmented" aria-label="Тип диалога"><button id="chat" class="segment active" type="button">Чат</button><button id="call" class="segment" type="button">Звонок</button></div>
       <label class="setting"><span class="label">Размер текста</span><select id="font" class="field"><option value="16">16</option><option value="18" selected>18</option><option value="20">20</option><option value="24">24</option></select></label>
       <label class="setting"><span class="label">Колонки</span><select id="columns" class="field"><option value="auto" selected>Авто</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></label>
+      <label class="toggle"><input id="compact" type="checkbox" checked><span>Объединять реплики</span></label>
       <button id="capture" class="btn" type="button" title="Режим съёмки, клавиша F">Режим съёмки</button>
     </div>
   </header>
@@ -112,7 +115,7 @@ THE SOFTWARE. */
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const els = {file:$('file'),chat:$('chat'),call:$('call'),font:$('font'),columns:$('columns'),capture:$('capture'),message:$('message'),screen:$('screen'),label:$('screen-label'),scrollHint:$('scroll-hint'),summary:$('summary'),page:$('page'),total:$('page-total'),prev:$('prev'),next:$('next'),topPrev:$('top-prev'),topNext:$('top-next'),measure:$('measure')};
+  const els = {file:$('file'),chat:$('chat'),call:$('call'),font:$('font'),columns:$('columns'),compact:$('compact'),capture:$('capture'),message:$('message'),screen:$('screen'),label:$('screen-label'),scrollHint:$('scroll-hint'),summary:$('summary'),page:$('page'),total:$('page-total'),prev:$('prev'),next:$('next'),topPrev:$('top-prev'),topNext:$('top-next'),measure:$('measure')};
   const state = {records:[],fileName:'',mode:'chat',pages:[],page:0,building:0,numericIds:false};
   const decoder = new TextDecoder();
   function tell(message,error=false) { els.message.textContent=message; els.message.classList.toggle('error',error); els.message.hidden=!message; }
@@ -226,6 +229,29 @@ THE SOFTWARE. */
     card.append(head,content); return card;
   }
   function cardHeight(item,width) { const card=makeCard(item); card.style.width=width+'px'; els.measure.append(card); const h=Math.ceil(card.getBoundingClientRect().height); card.remove(); return h; }
+  function compactDialogue(text) {
+    const lines=text.split(/\r\n|\n|\r/), output=[];
+    let run=[], role='', changed=false;
+    function flush() {
+      if (run.length===1) output.push(run[0].raw);
+      else if (run.length>1) {
+        changed=true;
+        const first=run[0], words=run.map(x=>x.words).filter(Boolean).join(' ');
+        output.push(first.prefix+(words?' '+words:''));
+      }
+      run=[]; role='';
+    }
+    for (const line of lines) {
+      const match=/^(\s*)(CLIENT|OPERATOR|CHATBOT|GIGAVOICE)(\s*):(\s*)(.*)$/i.exec(line);
+      if (!match) { flush(); output.push(line); continue; }
+      const nextRole=match[2].toUpperCase();
+      if (run.length && nextRole!==role) flush();
+      role=nextRole;
+      run.push({raw:line,prefix:match[1]+match[2]+match[3]+':',words:match[5].trim()});
+    }
+    flush();
+    return changed?output.join('\n'):text;
+  }
   function columnCount(width) { const selected=els.columns.value; return selected==='auto'?Math.max(1,Math.min(3,Math.floor((width+8)/430))):Math.max(1,Math.min(4,Number(selected),Math.floor((width+8)/260))); }
   function addToPages(pages,item,height,columns,limit) {
     let chosen=null,least=Infinity;
@@ -248,7 +274,7 @@ THE SOFTWARE. */
     document.documentElement.style.setProperty('--dialog-font',els.font.value+'px');
     els.measure.style.width=width+'px';
     const selected=state.records.filter(r=>r[state.mode]);
-    const items=selected.map(r=>({id:r.id,questionId:r.questionId,text:r[state.mode]}));
+    const items=selected.map(r=>({id:r.id,questionId:r.questionId,text:els.compact.checked?compactDialogue(r[state.mode]):r[state.mode]}));
     try {
       for (let i=0;i<items.length;i++) {
         items[i].height=cardHeight(items[i],width);
@@ -305,7 +331,7 @@ THE SOFTWARE. */
   for(const event of ['dragleave','drop']) drop.addEventListener(event,e=>{e.preventDefault();drop.classList.remove('drag');});
   drop.addEventListener('drop',e=>openFile(e.dataTransfer.files[0]));
   for (const mode of ['chat','call']) els[mode].addEventListener('click',()=>{ if(state.mode===mode) return; state.mode=mode; state.page=0; els.chat.classList.toggle('active',mode==='chat'); els.call.classList.toggle('active',mode==='call'); layout(); });
-  els.font.addEventListener('change',layout); els.columns.addEventListener('change',layout);
+  els.font.addEventListener('change',layout); els.columns.addEventListener('change',layout); els.compact.addEventListener('change',layout);
   els.prev.addEventListener('click',()=>goto(state.page-1)); els.next.addEventListener('click',()=>goto(state.page+1));
   els.topPrev.addEventListener('click',()=>goto(state.page-1)); els.topNext.addEventListener('click',()=>goto(state.page+1));
   els.page.addEventListener('change',()=>goto(Number(els.page.value)-1));
